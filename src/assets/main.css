@@ -6,6 +6,10 @@ body {
   font-family: 'Noto Sans Thai', sans-serif;
 }
 
+button, input {
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
