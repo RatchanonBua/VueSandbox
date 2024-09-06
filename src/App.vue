@@ -13,6 +13,7 @@ export default {
       picture: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
       size: 150,
       social: 'https://www.facebook.com/ratchanon.bua',
+      // hobbies: [],
       hobbies: ['การเล่นเกม', 'การฟังเพลง', 'การไลฟ์สตรีมสด'],
       general: { gender: 'ชาย', weight: 67.5, height: 175, status: false },
       count: 0
@@ -31,13 +32,24 @@ export default {
     decrement(value = 1) {
       this.count -= value
     },
-    setNickName(event) {
+    setNickName(event: Event) {
       // console.log(event.target.value)
-      this.nickName = event.target.value
+      if (event.target instanceof HTMLInputElement) {
+        this.nickName = event.target.value
+      }
     },
-    submitForm(event) {
+    submitForm(event: Event) {
       // event.preventDefault()
-      alert('บันทึกชื่อเล่นเรียบร้อย')
+      const input = this.$refs.nickNameEl as HTMLInputElement
+      this.nickName = input.value
+
+      if (event.target instanceof HTMLFormElement) {
+        // console.log(event)
+        const form = this.$refs.myForm as HTMLFormElement
+        const formData = new FormData(form)
+        const nickName = formData.get('nickName') as string
+        console.log(`บันทึกชื่อเล่น ${nickName} เรียบร้อย`)
+      }
     }
   }
 }
@@ -56,30 +68,42 @@ export default {
   </header>
   <RouterView /> -->
   <section>
-    <img :src="picture" :width="size" :height="size" alt="Image" />
+    <img :src="picture" :width="size" :height="size" ref="imageEl" alt="Image" />
     <br />
     <!-- ป้อนชื่อเล่น: <input type="text" @input="setNickName" /> -->
-    <form @submit.prevent="submitForm">
+
+    <form @submit.prevent="submitForm" ref="myForm">
       <label>ป้อนชื่อเล่น:</label>
-      <input type="text" @input="setNickName" />
+      <input type="text" name="nickName" ref="nickNameEl" />
       <button type="submit">บันทึก</button>
     </form>
+
     <h1>ชื่อ-นามสกุล: {{ getFullName() }} | ชื่อเล่น: {{ nickName }} | อายุ: {{ age }} ปี</h1>
     <p>ที่อยู่: <span v-html="address"></span></p>
     <p>Social: <a :href="social" target="_blank">Facebook</a></p>
-    <p>งานอดิเรก:</p>
-    <ul>
-      <li>{{ hobbies[0] }}</li>
-      <li>{{ hobbies[1] }}</li>
-      <li>{{ hobbies[2] }}</li>
-    </ul>
+
+    <div v-if="hobbies.length === 0">
+      <p>ไม่มีงานอดิเรก</p>
+    </div>
+    <div v-else>
+      <p>งานอดิเรก:</p>
+      <ul>
+        <li v-for="(item, index) in hobbies" :key="index">{{ index + 1 }} - {{ item }}</li>
+        <!-- <li>{{ hobbies[0] }}</li> -->
+        <!-- <li>{{ hobbies[1] }}</li> -->
+        <!-- <li>{{ hobbies[2] }}</li> -->
+      </ul>
+    </div>
+
     <p>ข้อมูลพื้นฐาน:</p>
     <ul>
-      <li>เพศ: {{ general.gender }}</li>
-      <li>น้ำหนัก: {{ general.weight }} กก.</li>
-      <li>ส่วนสูง: {{ general.height }} ซม.</li>
-      <li>โรคประจำตัว: {{ general.status }}</li>
+      <li v-for="(item, key) in general" :key="key">{{ key }} - {{ item }}</li>
+      <!-- <li>เพศ: {{ general.gender }}</li> -->
+      <!-- <li>น้ำหนัก: {{ general.weight }} กก.</li> -->
+      <!-- <li>ส่วนสูง: {{ general.height }} ซม.</li> -->
+      <!-- <li>โรคประจำตัว: {{ general.status }}</li> -->
     </ul>
+
     <p>นับตัวเลข: {{ count }}</p>
     <button @click="showData()">คลิกเพื่อดูข้อมูล</button>
     <button @click.ctrl="increment()">เพิ่ม</button>
