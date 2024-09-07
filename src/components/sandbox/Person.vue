@@ -14,7 +14,16 @@ export default {
       message: 'ข้อมูลพนักงานแต่ละคน'
     }
   },
-  props: ['name', 'salary']
+  props: {
+    name: {
+      type: String,
+      required: true
+    },
+    salary: {
+      type: Number,
+      default: 15000
+    }
+  }
 }
 </script>
 
