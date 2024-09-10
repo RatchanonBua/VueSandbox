@@ -4,17 +4,19 @@
     <template v-slot:card-header>
       <h1>ชื่อ: {{ name }}</h1>
     </template>
-    <template v-slot:card-button>
+    <!-- <template v-slot:card-button>
       <button @click="toggleDescription(id)">ดูรายละเอียด</button>
       &nbsp;
       <button @click="deleteEmployee(id)">ลบข้อมูล</button>
-    </template>
+    </template> -->
     <template v-slot:card-content>
-      <transition name="fade">
+      <!-- <transition name="fade">
         <div v-show="isVisible">
           <p>เงินเดือน: {{ salary }} บาท | ตำแหน่งงาน: {{ department }}</p>
         </div>
-      </transition>
+      </transition> -->
+      <p>เงินเดือน: {{ salary }} บาท | ตำแหน่งงาน: {{ department }} | เพศ: {{ gender }}</p>
+      <p>ทักษะด้านภาษา: {{ skill }}</p>
     </template>
   </Card>
 </template>
@@ -33,9 +35,12 @@ export default {
     }
   },
   props: {
-    id: {
-      type: Number
-    },
+    // id: {
+    //   type: Number
+    // },
+    // isVisible: {
+    //   type: Boolean
+    // },
     name: {
       type: String,
       required: true
@@ -48,8 +53,11 @@ export default {
       type: String,
       required: true
     },
-    isVisible: {
-      type: Boolean
+    gender: {
+      type: String
+    },
+    skill: {
+      type: Array
     }
   },
   methods: {

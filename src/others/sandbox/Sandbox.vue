@@ -2,36 +2,48 @@
   <header>
     <h1>ระบบจัดการข้อมูลพนักงาน</h1>
   </header>
-  <section class="employee-content">
+  <FormComponent @save="insertEmployee" />
+  <section class="employee-content" v-if="employees.length > 0">
+    <!-- {{ JSON.stringify(employees) }} -->
     <!-- <h1>App Component</h1> -->
     <!-- <FormComponent /> -->
     <!-- <ListData :employees="employees" /> -->
     <h2>ข้อมูลพนักงาน</h2>
-    <ListData />
+    <ListData :employees="employees" />
   </section>
 </template>
 
 <script lang="ts">
-// import FormComponent from './components/sandbox/FormComponent.vue'
+import FormComponent from '../../components/sandbox/FormComponent.vue'
 import ListData from '../../components/sandbox/ListData.vue'
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Sandbox',
   components: {
-    ListData
-    // FormComponent
+    ListData,
+    FormComponent
+  },
+  data() {
+    return {
+      employees: [] as Object[]
+    }
+    // return {
+    //   employees: [
+    //     { name: 'ก้อง', salary: 40000 },
+    //     { name: 'แก้ม', salary: 30000 },
+    //     { name: 'โจโจ้' },
+    //     { name: 'ชาลี', salary: 900 },
+    //     { name: 'ตั๊กแตน' }
+    //   ]
+    // }
+  },
+  methods: {
+    insertEmployee(data: Object) {
+      // console.log('รับข้อมูลพนักงาน = ', data)
+      this.employees.push(data)
+      // console.log(this.employees)
+    }
   }
-  // data() {
-  //   return {
-  //     employees: [
-  //       { name: 'ก้อง', salary: 40000 },
-  //       { name: 'แก้ม', salary: 30000 },
-  //       { name: 'โจโจ้' },
-  //       { name: 'ชาลี', salary: 900 },
-  //       { name: 'ตั๊กแตน' }
-  //     ]
-  //   }
-  // }
 }
 </script>
 
