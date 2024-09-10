@@ -5,6 +5,15 @@
   <Person name="ตั๊กแตน" salary="15000" />
   <Person name="แก้ม" salary="18000" /> -->
   <ul>
+    <!-- <Card>
+      พนักงานคนที่ 1
+    </Card>
+    <Card>
+      พนักงานคนที่ 2
+    </Card>
+    <Card>
+      พนักงานคนที่ 3
+    </Card> -->
     <Person
       v-for="item in employees"
       :key="item.id"
@@ -13,6 +22,8 @@
       :salary="item.salary"
       :department="item.department"
       :isVisible="item.isVisible"
+      @toggle="toggleVisible"
+      @delete="removeEmployee"
     />
   </ul>
 </template>
@@ -33,6 +44,23 @@ export default {
         { id: 4, name: 'ชาลี ยิ้มเก่ง', salary: 900, department: 'กราฟิก', isVisible: false },
         { id: 5, name: 'ตั๊กแตน เรียนดี', department: 'ฝ่ายขาย', isVisible: false }
       ]
+    }
+  },
+  methods: {
+    toggleVisible(id: number) {
+      console.log('Child ID = ', id, 'toggleVisible')
+      this.employees = this.employees.map((item) => {
+        if (item.id === id) {
+          return { ...item, isVisible: !item.isVisible }
+        }
+        return item
+      })
+    },
+    removeEmployee(id: number) {
+      console.log('Child ID = ', id, 'removeEmployee')
+      this.employees = this.employees.filter((item) => {
+        return item.id !== id
+      })
     }
   }
   // props: ['employees']
