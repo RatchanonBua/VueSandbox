@@ -8,6 +8,11 @@ const router = createRouter({
       path: '/',
       name: 'Home',
       component: HomeView
+    },
+    {
+      path: '/currentcy_exchange',
+      name: 'Currentcy Exchange',
+      component: () => import('@/views/applications/CurrencyExchangeView.vue')
     }
   ]
 })
