@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import './assets/main.css'
+import '../../assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
-import App from './App.vue'
-import router from './router'
+import Lessons from './Lessons.vue'
+import router from '../../router'
 
 import $ from 'jquery'
 
@@ -14,7 +14,7 @@ $(function ($) {
   console.log($)
 })
 
-const app = createApp(App)
+const app = createApp(Lessons)
 
 app.use(createPinia())
 app.use(router)
