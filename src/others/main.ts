@@ -1,10 +1,11 @@
-import './assets/applications/main.css'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import '@/assets/others/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import App from './App.vue'
-import router from './router/applications/index'
+import router from '@/router/others/index'
 
 import $ from 'jquery'
 
