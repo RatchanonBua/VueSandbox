@@ -14,8 +14,8 @@
 </template>
 
 <script lang="ts">
-import FormComponent from '../../components/sandbox/FormComponent.vue'
-import ListData from '../../components/sandbox/ListData.vue'
+import FormComponent from '@/components/others/sandbox/FormComponent.vue'
+import ListData from '@/components/others/sandbox/ListData.vue'
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
   name: 'Sandbox',

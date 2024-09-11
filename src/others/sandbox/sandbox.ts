@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import '../../assets/sandbox.css'
+import '@/assets/others/sandbox.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
 import Sandbox from './Sandbox.vue'
-import router from '../../router'
+import router from '@/router/others/sandbox'
 
 import $ from 'jquery'
 
