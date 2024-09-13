@@ -1,15 +1,15 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <Card>
-    <template v-slot:card-header>
+    <template #card-header>
       <h1>ชื่อ: {{ name }}</h1>
     </template>
-    <!-- <template v-slot:card-button>
+    <!-- <template #card-button>
       <button @click="toggleDescription(id)">ดูรายละเอียด</button>
       &nbsp;
       <button @click="deleteEmployee(id)">ลบข้อมูล</button>
     </template> -->
-    <template v-slot:card-content>
+    <template #card-content>
       <!-- <transition name="fade">
         <div v-show="isVisible">
           <p>เงินเดือน: {{ salary }} บาท | ตำแหน่งงาน: {{ department }}</p>
@@ -22,17 +22,17 @@
 </template>
 
 <script lang="ts">
-import Card from './Card.vue'
+import Card from "./Card.vue";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Person',
+  name: "Person",
   components: {
-    Card
+    Card,
   },
   data() {
     return {
-      message: 'ข้อมูลพนักงานแต่ละคน'
-    }
+      message: "ข้อมูลพนักงานแต่ละคน",
+    };
   },
   props: {
     // id: {
@@ -43,42 +43,42 @@ export default {
     // },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     salary: {
       type: Number,
-      default: 15000
+      default: 15000,
     },
     department: {
       type: String,
-      required: true
+      required: true,
     },
     gender: {
-      type: String
+      type: String,
     },
     skill: {
-      type: Array
-    }
+      type: Array,
+    },
   },
   methods: {
     toggleDescription(id: number | undefined) {
-      if (typeof id === 'number') {
-        console.log(id, 'number', 'toggleDescription')
-        this.$emit('toggle', id)
+      if (typeof id === "number") {
+        console.log(id, "number", "toggleDescription");
+        this.$emit("toggle", id);
       } else {
-        console.log(id, typeof id, 'toggleDescription')
+        console.log(id, typeof id, "toggleDescription");
       }
     },
     deleteEmployee(id: number | undefined) {
-      if (typeof id === 'number') {
-        console.log(id, 'number', 'deleteEmployee')
-        this.$emit('delete', id)
+      if (typeof id === "number") {
+        console.log(id, "number", "deleteEmployee");
+        this.$emit("delete", id);
       } else {
-        console.log(id, typeof id, 'deleteEmployee')
+        console.log(id, typeof id, "deleteEmployee");
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>

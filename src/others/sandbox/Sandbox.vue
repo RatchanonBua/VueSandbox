@@ -14,37 +14,31 @@
 </template>
 
 <script lang="ts">
-import FormComponent from '@/components/others/sandbox/FormComponent.vue'
-import ListData from '@/components/others/sandbox/ListData.vue'
+import FormComponent from "@/components/others/sandbox/FormComponent.vue";
+import ListData from "@/components/others/sandbox/ListData.vue";
 export default {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: 'Sandbox',
+  name: "Sandbox",
   components: {
     ListData,
-    FormComponent
+    FormComponent,
   },
   data() {
     return {
-      employees: [] as Object[]
-    }
+      employees: [] as Object[],
+    };
     // return {
-    //   employees: [
-    //     { name: 'ก้อง', salary: 40000 },
-    //     { name: 'แก้ม', salary: 30000 },
-    //     { name: 'โจโจ้' },
-    //     { name: 'ชาลี', salary: 900 },
-    //     { name: 'ตั๊กแตน' }
-    //   ]
-    // }
+    //   employees: [{ name: "ก้อง", salary: 40000 }, { name: "แก้ม", salary: 30000 }, { name: "โจโจ้" }, { name: "ชาลี", salary: 900 }, { name: "ตั๊กแตน" }],
+    // };
   },
   methods: {
     insertEmployee(data: Object) {
-      // console.log('รับข้อมูลพนักงาน = ', data)
-      this.employees.push(data)
-      // console.log(this.employees)
-    }
-  }
-}
+      // console.log("รับข้อมูลพนักงาน = ", data);
+      this.employees.push(data);
+      // console.log(this.employees);
+    },
+  },
+};
 </script>
 
 <style scoped>

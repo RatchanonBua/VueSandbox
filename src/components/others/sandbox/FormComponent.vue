@@ -54,42 +54,41 @@
 
 <script lang="ts">
 export default {
-  name: 'FormComponent',
+  name: "FormComponent",
   data() {
     return {
-      // message: 'แบบฟอร์มบันทึกข้อมูลพนักงาน'
       employee: {
-        name: '',
+        name: "",
         salary: 0,
-        department: 'ฝ่ายการตลาด',
-        gender: '',
-        skill: []
-      }
-    }
+        department: "ฝ่ายการตลาด",
+        gender: "",
+        skill: [],
+      },
+    };
   },
   methods: {
     submitForm() {
-      // console.log('บันทึกข้อมูลพนักงาน')
-      // console.log(this.employee)
+      // console.log("บันทึกข้อมูลพนักงาน");
+      // console.log(this.employee);
       const newEmployee = {
         name: this.employee.name,
         salary: this.employee.salary,
         department: this.employee.department,
         gender: this.employee.gender,
-        skill: this.employee.skill
-      }
-      this.$emit('save', newEmployee)
-      this.resetForm()
+        skill: this.employee.skill,
+      };
+      this.$emit("save", newEmployee);
+      this.resetForm();
     },
     resetForm() {
-      this.employee.name = ''
-      this.employee.salary = 0
-      this.employee.department = 'ฝ่ายการตลาด'
-      this.employee.gender = ''
-      this.employee.skill = []
-    }
-  }
-}
+      this.employee.name = "";
+      this.employee.salary = 0;
+      this.employee.department = "ฝ่ายการตลาด";
+      this.employee.gender = "";
+      this.employee.skill = [];
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -131,15 +130,15 @@ button {
   border-radius: 15px;
 }
 
-input[type='radio'],
-input[type='checkbox'] {
+input[type="radio"],
+input[type="checkbox"] {
   display: inline-block;
   width: auto;
   margin-right: 1rem;
 }
 
-input[type='radio'] + label,
-input[type='checkbox'] + label {
+input[type="radio"] + label,
+input[type="checkbox"] + label {
   font-weight: normal;
 }
 
