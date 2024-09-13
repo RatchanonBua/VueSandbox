@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import '@/assets/others/sandbox.css'
+import "@/assets/others/sandbox.css";
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from "vue";
+import { createPinia } from "pinia";
 
-import Lessons from './Lessons.vue'
-import router from '@/router/others/sandbox'
+import Lessons from "./Lessons.vue";
+import router from "@/router/others/sandbox";
 
-import $ from 'jquery'
+import $ from "jquery";
 
 $(function ($) {
-  console.log('Document Ready')
-  console.log($)
-})
+  console.log("Document Ready");
+  console.log($);
+});
 
-const app = createApp(Lessons)
+const app = createApp(Lessons);
 
-app.use(createPinia())
-app.use(router)
+app.use(createPinia());
+app.use(router);
 
-app.mount('#app')
+app.mount("#app");

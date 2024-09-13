@@ -1,91 +1,91 @@
 <script lang="ts">
 export default {
-  name: 'App',
+  name: "App",
   data() {
     return {
-      realName: 'รัชชานนท์',
-      lastName: 'บัวลีสอนสกุล',
-      nickName: '',
+      realName: "รัชชานนท์",
+      lastName: "บัวลีสอนสกุล",
+      nickName: "",
       age: 27,
-      address: '<strong>ปทุมธานี</strong>',
-      picture: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+      address: "<strong>ปทุมธานี</strong>",
+      picture: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
       size: 150,
-      social: 'https://www.facebook.com/ratchanon.bua',
+      social: "https://www.facebook.com/ratchanon.bua",
       // hobbies: [],
-      hobbies: ['การเล่นเกม', 'การฟังเพลง', 'การไลฟ์สตรีมสด'],
-      general: { gender: 'ชาย', weight: 67.5, height: 175, status: false },
+      hobbies: ["การเล่นเกม", "การฟังเพลง", "การไลฟ์สตรีมสด"],
+      general: { gender: "ชาย", weight: 67.5, height: 175, status: false },
       count: 0,
       isVisible: false,
-      salary: 20000
-    }
+      salary: 20000,
+    };
   },
   methods: {
     _getFullName() {
-      return `${this.realName + ' ' + this.lastName}`
+      return `${this.realName + " " + this.lastName}`;
     },
     showData() {
-      alert(this.realName)
+      alert(this.realName);
     },
     increment(value = 1) {
-      this.count += value
+      this.count += value;
     },
     decrement(value = 1) {
-      this.count -= value
+      this.count -= value;
     },
     setNickName(event: Event) {
-      // console.log(event.target.value)
+      // console.log(event.target.value);
       if (event.target instanceof HTMLInputElement) {
-        this.nickName = event.target.value
+        this.nickName = event.target.value;
       }
     },
     submitForm(event: Event) {
-      // event.preventDefault()
-      const input = this.$refs.nickNameEl as HTMLInputElement
-      this.nickName = input.value
+      // event.preventDefault();
+      const input = this.$refs.nickNameEl as HTMLInputElement;
+      this.nickName = input.value;
 
       if (event.target instanceof HTMLFormElement) {
-        // console.log(event)
-        const form = this.$refs.myForm as HTMLFormElement
-        const formData = new FormData(form)
-        const nickName = formData.get('nickName') as string
-        console.log(`บันทึกชื่อเล่น ${nickName} เรียบร้อย`)
+        // console.log(event);
+        const form = this.$refs.myForm as HTMLFormElement;
+        const formData = new FormData(form);
+        const nickName = formData.get("nickName") as string;
+        console.log(`บันทึกชื่อเล่น ${nickName} เรียบร้อย`);
       }
     },
     toggleVisible() {
-      this.isVisible = !this.isVisible
+      this.isVisible = !this.isVisible;
     },
     getRandomByMethod() {
-      return Math.random()
+      return Math.random();
     },
     addSalary(value: number = 0) {
-      this.salary += value
-    }
+      this.salary += value;
+    },
   },
   computed: {
     getFullName() {
-      return `${this.realName + ' ' + this.lastName}`
+      return `${this.realName + " " + this.lastName}`;
     },
     getRandomByComputed() {
-      return Math.random()
+      return Math.random();
     },
     getIncome() {
-      return this.salary * 12
+      return this.salary * 12;
     },
     getDepartment() {
-      return this.salary >= 35000 ? 'Project Manager' : 'Programmer'
-    }
+      return this.salary >= 35000 ? "Project Manager" : "Programmer";
+    },
   },
   watch: {
     salary(value) {
       if (value > 50000) {
-        alert('เงินเดือนไม่ควรเกิน 50,000 บาท')
+        alert("เงินเดือนไม่ควรเกิน 50,000 บาท");
         setTimeout(() => {
-          this.salary = 50000
-        }, 100)
+          this.salary = 50000;
+        }, 100);
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <template>
@@ -112,7 +112,7 @@ export default {
     <!-- <h2>Computed 1: {{ getRandomByComputed }}</h2> -->
     <!-- <h2>Computed 2: {{ getRandomByComputed }}</h2> -->
 
-    <button @click="toggleVisible">{{ isVisible ? 'ซ่อน' : 'แสดง' }}รายละเอียด</button>
+    <button @click="toggleVisible">{{ isVisible ? "ซ่อน" : "แสดง" }}รายละเอียด</button>
     <article v-show="isVisible">
       <p>ที่อยู่: <span v-html="address"></span></p>
       <p>Social: <a :href="social" target="_blank">Facebook</a></p>
