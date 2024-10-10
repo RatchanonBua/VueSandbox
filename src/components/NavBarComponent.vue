@@ -9,12 +9,6 @@ import IconProfile from "./icons/IconProfile.vue";
 export default {
   name: "NavBarComponent",
   components: { IconHome, IconNotify, IconSetting, IconProfile, RouterLink },
-  props: {
-    title: {
-      type: String,
-      default: "Application",
-    },
-  },
 };
 </script>
 
