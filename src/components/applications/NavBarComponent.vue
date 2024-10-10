@@ -1,32 +1,44 @@
 <script lang="ts">
+import { RouterLink } from "vue-router";
+
+import IconHome from "./icons/IconHome.vue";
+import IconNotify from "./icons/IconNotify.vue";
+import IconSetting from "./icons/IconSetting.vue";
+import IconProfile from "./icons/IconProfile.vue";
+
 export default {
-  name: 'NavBarComponent',
+  name: "NavBarComponent",
+  components: { IconHome, IconNotify, IconSetting, IconProfile, RouterLink },
   props: {
     title: {
       type: String,
-      default: 'App'
-    }
-  }
-}
+      default: "Application",
+    },
+  },
+};
 </script>
 
 <template>
-  <nav class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
-    <!-- <h1 class="text-black dark:text-white font-bold m-2">{{ title }}</h1> -->
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto px-4 py-3">
-      <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-        <img src="https://cdn-icons-png.flaticon.com/512/506/506280.png" class="h-12" alt="Logo" />
-        <div class="flex flex-col">
-          <span class="text-2xl font-semibold whitespace-nowrap dark:text-white">Sandbox</span>
-          <span class="text-m font-semibold whitespace-nowrap dark:text-white capitalize">★ {{ title }}</span>
-        </div>
-      </a>
-      <button data-collapse-toggle="navbar-hamburger" type="button" class="inline-flex items-center justify-center p-2 w-10 h-10 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-hamburger" aria-expanded="false">
-        <span class="sr-only">Open main menu</span>
-        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
-        </svg>
-      </button>
+  <nav class="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
+    <div class="grid h-full max-w-lg grid-cols-4 mx-auto font-medium">
+      <RouterLink to="/" class="inline-flex flex-col items-center justify-center px-4 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+        <IconHome cssClass="w-6 h-6 mt-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" />
+        <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">Home</span>
+      </RouterLink>
+      <RouterLink to="/notifications" class="inline-flex flex-col items-center justify-center px-4 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+        <IconNotify cssClass="w-6 h-6 mt-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" />
+        <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">Notifications</span>
+      </RouterLink>
+      <RouterLink to="/settings" class="inline-flex flex-col items-center justify-center px-4 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+        <IconSetting cssClass="w-6 h-6 mt-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" />
+        <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">Settings</span>
+      </RouterLink>
+      <RouterLink to="/profile" class="inline-flex flex-col items-center justify-center px-4 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+        <IconProfile cssClass="w-6 h-6 mt-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" />
+        <span class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500">Profile</span>
+      </RouterLink>
     </div>
   </nav>
 </template>
+
+<style scoped></style>
