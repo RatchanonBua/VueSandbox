@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import "@/assets/others/sandbox.css";
+import "@/refers/assets/main.css";
 
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 
-import Lessons from "./Lessons.vue";
-import router from "@/router/others/sandbox";
+import App from "./App.vue";
+import router from "@/refers/router/index";
 
 import $ from "jquery";
 
@@ -14,7 +14,7 @@ $(function ($) {
   console.log($);
 });
 
-const app = createApp(Lessons);
+const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
