@@ -25,8 +25,8 @@ const router = createRouter({
       component: () => import("@/views/ProfileView.vue"),
     },
     {
-      path: "/currentcy_exchange",
-      name: "Currentcy Exchange",
+      path: "/currency_exchange",
+      name: "Currency Exchange",
       component: () => import("@/views/CurrencyExchangeView.vue"),
     },
   ],
