@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import "@/refers/assets/main.css";
+import "@/refers/assets/css/main.css";
 
 import { createApp } from "vue";
 import { createPinia } from "pinia";
