@@ -8,6 +8,12 @@ export default {
     "./node_modules/flowbite/**/*.js",
   ],
   theme: {
+    screens: {
+      "bs-sm": "576px",
+      "bs-md": "768px",
+      "bs-lg": "992px",
+      "bs-xl": "1200px",
+    },
     extend: {},
   },
   plugins: [
