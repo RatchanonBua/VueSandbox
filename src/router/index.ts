@@ -29,6 +29,11 @@ const router = createRouter({
       name: "Currency Exchange",
       component: () => import("@/views/CurrencyExchangeView.vue"),
     },
+    {
+      path: "/weather_forecast",
+      name: "Weather Forecast",
+      component: () => import("@/views/WeatherForecastView.vue"),
+    },
   ],
 });
 

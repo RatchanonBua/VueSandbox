@@ -2,7 +2,7 @@
 
 <template>
   <div class="bg-gray-50 flex items-center justify-center">
-    <div class="w-full h-screen relative">
+    <div class="w-full h-screen relative bg-gray-100 dark:bg-gray-600">
       <div class="bg-gradient-to-br from-green-600 to-blue-700 dark:from-gray-700 dark:to-gray-800 pt-6 pb-12 px-4 text-white">
         <h1 class="text-3xl font-bold mb-3">Currency Exchange</h1>
         <div class="mb-5">

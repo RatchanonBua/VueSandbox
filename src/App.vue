@@ -1,7 +1,7 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
-import NavBarComponent from "@/components/NavBarComponent.vue";
+import NavBarComponent from "@/components/groups/navbar/NavBarComponent.vue";
 </script>
 
 <template>
