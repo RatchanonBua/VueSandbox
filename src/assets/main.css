@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 body {
+  min-width: 320px;
   font-family: "Noto Sans Thai", sans-serif;
 }
 

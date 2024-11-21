@@ -1,10 +1,10 @@
 <script lang="ts">
 import { RouterLink } from "vue-router";
 
-import IconHome from "./icons/navbar/IconHome.vue";
-import IconFeed from "./icons/navbar/IconFeed.vue";
-import IconNotify from "./icons/navbar/IconNotify.vue";
-import IconProfile from "./icons/navbar/IconProfile.vue";
+import IconHome from "@/components/icons/navbar/IconHome.vue";
+import IconFeed from "@/components/icons/navbar/IconFeed.vue";
+import IconNotify from "@/components/icons/navbar/IconNotify.vue";
+import IconProfile from "@/components/icons/navbar/IconProfile.vue";
 
 export default {
   name: "NavBarComponent",
