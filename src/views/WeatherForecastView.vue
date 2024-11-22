@@ -1,13 +1,20 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <!-- eslint-disable no-case-declarations -->
 <script lang="ts">
+// Import Libraries
 import $ from "jquery";
+import { ref } from "vue";
+// Import Stores
+import { useLocationStore } from "@/stores/location";
+// Import Icons
 import IconSearch from "@/components/icons/useful/IconSearch.vue";
+// Import Components
 import ImageComponent from "@/components/groups/useful/ImageComponent.vue";
+// Import Items
 import CurrentStatsItem from "@/components/groups/weather/CurrentStatsItem.vue";
 import WeatherHourItem from "@/components/groups/weather/WeatherHourItem.vue";
 import WeatherNextItem from "@/components/groups/weather/WeatherNextItem.vue";
-
+// Export Components
 export default {
   name: "WeatherForecastView",
   components: { IconSearch, ImageComponent, CurrentStatsItem, WeatherHourItem, WeatherNextItem },
@@ -16,59 +23,20 @@ export default {
       btnCSS: "text-white pt-0.5",
     };
   },
+  setup() {
+    const locationStore = useLocationStore();
+    const latitude = ref<number | null>(null);
+    const longitude = ref<number | null>(null);
+    const initLocation = async () => {
+      await locationStore.initLocationService();
+      if (locationStore.locationData) {
+        latitude.value = locationStore.locationData.latitude;
+        longitude.value = locationStore.locationData.longitude;
+      }
+    };
+    return { latitude, longitude, initLocation };
+  },
   methods: {
-    initGeolocation(): void {
-      if (navigator.geolocation) {
-        if (navigator.permissions) {
-          navigator.permissions.query({ name: "geolocation" }).then((permission) => {
-            if (permission.state === "granted" || permission.state === "prompt") {
-              console.log("init-geolocation:ok-perms", permission.state);
-              this.getGeolocationFromGPS();
-            } else {
-              console.log("init-geolocation:block-perms", permission.state);
-              this.handleGPSLocationError(true, false);
-            }
-          });
-        } else {
-          console.log("init-geolocation:no-perms");
-          this.getGeolocationFromGPS();
-        }
-      } else {
-        console.log("init-geolocation:no-geoapi");
-        this.handleGPSLocationError(false, false);
-      }
-    },
-    getGeolocationFromGPS(): void {
-      const options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          var posLat = position.coords.latitude;
-          var posLon = position.coords.longitude;
-          if (typeof posLat === "number" && typeof posLon === "number" && posLat >= -90 && posLat <= 90 && posLon >= -180 && posLon <= 180) {
-            console.log(`Latitude: ${posLat}, Longitude: ${posLon}`);
-            // this.getCityNameByLocation(posLat, posLon);
-          } else {
-            this.handleGPSLocationError(true, true);
-          }
-        },
-        () => {
-          console.log("gps-location:error");
-          this.handleGPSLocationError(true, true);
-        },
-        options
-      );
-    },
-    handleGPSLocationError(hasGeolocation: boolean, hasPermission: boolean): void {
-      let errorMessage: string = "";
-      if (!hasGeolocation) {
-        errorMessage = "อุปกรณ์ไม่รองรับการทำงานของ GPS";
-      } else if (!hasPermission) {
-        errorMessage = "ท่านไม่ได้อนุญาตการทำงานของ GPS";
-      } else {
-        errorMessage = "GPS ของท่านมีปัญหา กรุณาลองอีกครั้ง";
-      }
-      console.log(errorMessage);
-    },
     getCityNameByLocation(lat: number = 0, lon: number = 0): string {
       // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
       return "Bangkok, Thailand";
@@ -118,9 +86,10 @@ export default {
         <div class="w-full">
           <h1 class="m-0 text-2xl font-semibold" id="city-str">{{ getCityNameByLocation() }}</h1>
           <div class="empty" id="date-str">{{ getDateStringByLang("th") }}</div>
+          <div class="empty" v-if="latitude && longitude">{{ latitude }},{{ longitude }}</div>
         </div>
         <div class="search-button">
-          <button class="w-6 h-6 rounded-full object-cover" @click="getGeolocationFromGPS">
+          <button class="w-6 h-6 rounded-full object-cover" @click="initLocation">
             <IconSearch :cssClass="btnCSS" />
           </button>
         </div>
