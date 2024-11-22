@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 // Interfaces
-interface GeoLocationData {
+type GeoLocationData = {
   latitude: number | null;
   longitude: number | null;
   altitude: number | null;

@@ -20,23 +20,14 @@ export default {
   components: { IconSearch, ImageComponent, CurrentStatsItem, WeatherHourItem, WeatherNextItem },
   data() {
     return {
+      locationStore: useLocationStore(),
       btnCSS: "text-white pt-0.5",
     };
   },
-  setup() {
-    const locationStore = useLocationStore();
-    const latitude = ref<number | null>(null);
-    const longitude = ref<number | null>(null);
-    const initLocation = async () => {
-      await locationStore.initLocationService();
-      if (locationStore.locationData) {
-        latitude.value = locationStore.locationData.latitude;
-        longitude.value = locationStore.locationData.longitude;
-      }
-    };
-    return { latitude, longitude, initLocation };
-  },
   methods: {
+    fetchLocation() {
+      this.locationStore.initLocationService();
+    },
     getCityNameByLocation(lat: number = 0, lon: number = 0): string {
       // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
       return "Bangkok, Thailand";
@@ -73,7 +64,11 @@ export default {
       }
     },
   },
-  computed: {},
+  computed: {
+    getLocationData() {
+      return this.locationStore.locationData;
+    },
+  },
 };
 </script>
 
@@ -86,10 +81,10 @@ export default {
         <div class="w-full">
           <h1 class="m-0 text-2xl font-semibold" id="city-str">{{ getCityNameByLocation() }}</h1>
           <div class="empty" id="date-str">{{ getDateStringByLang("th") }}</div>
-          <div class="empty" v-if="latitude && longitude">{{ latitude }},{{ longitude }}</div>
+          <div class="empty" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
         </div>
         <div class="search-button">
-          <button class="w-6 h-6 rounded-full object-cover" @click="initLocation">
+          <button class="w-6 h-6 rounded-full object-cover" @click="fetchLocation">
             <IconSearch :cssClass="btnCSS" />
           </button>
         </div>
