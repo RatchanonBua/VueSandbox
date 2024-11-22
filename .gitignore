@@ -28,3 +28,8 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Environment variables (should not be committed to Git)
+.env
+.env.development
+.env.production
