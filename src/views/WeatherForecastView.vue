@@ -4,6 +4,8 @@
 // Import Libraries
 import $ from "jquery";
 import { ref } from "vue";
+// Import Declarations
+import type { GeoLocationData } from "@/declarations/types";
 // Import Stores
 import { useLocationStore } from "@/stores/location";
 // Import Icons
@@ -20,13 +22,26 @@ export default {
   components: { IconSearch, ImageComponent, CurrentStatsItem, WeatherHourItem, WeatherNextItem },
   data() {
     return {
-      locationStore: useLocationStore(),
+      locationData: null as GeoLocationData | null,
+      errorMessage: null as string | null,
       btnCSS: "text-white pt-0.5",
     };
   },
+  setup() {
+    const locationStore = useLocationStore();
+    return { locationStore };
+  },
   methods: {
-    fetchLocation() {
-      this.locationStore.initLocationService();
+    async fetchLocation(): Promise<void> {
+      try {
+        await this.locationStore.initLocationService();
+        console.log("Before: ", this.locationData);
+        this.locationData = this.locationStore.locationData;
+        console.log("Success: ", this.locationData);
+      } catch (error: any) {
+        this.errorMessage = error.message;
+        // console.log("Error: ", this.errorMessage);
+      }
     },
     getCityNameByLocation(lat: number = 0, lon: number = 0): string {
       // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
@@ -66,7 +81,10 @@ export default {
   },
   computed: {
     getLocationData() {
-      return this.locationStore.locationData;
+      return this.locationData;
+    },
+    getErrorMessage() {
+      return this.errorMessage;
     },
   },
 };
