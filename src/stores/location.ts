@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import type { GeoLocationData } from "@/declarations/types";
+import type { GeoLocationData } from "@/utils/types";
 // Export
 export const useLocationStore = defineStore("location", () => {
   // Location Data
@@ -40,7 +40,7 @@ export const useLocationStore = defineStore("location", () => {
         coordsJSON = { ...coordsJSON, timestampNum: tsNum, timestampStr: tsStr };
         // Result Data
         console.log("get-location-from-gps:retrieve-success", `Success`);
-        locationData.value = { ...coordsJSON, errorMessage: null, isGPSError: false };
+        locationData.value = coordsJSON;
         resolve();
       },
       (error) => {
@@ -74,7 +74,7 @@ export const useLocationStore = defineStore("location", () => {
     } else if (!hasPermission) {
       errorMessage = "คุณไม่ได้อนุญาตการทำงานของ GPS";
     } else {
-      errorMessage = "GPS ของคุณมีปัญหา กรุณาลองอีกครั้ง";
+      errorMessage = "ระบบ GPS มีปัญหา กรุณาลองอีกครั้ง";
     }
     // Add Error String
     if (errorString.length > 0) {

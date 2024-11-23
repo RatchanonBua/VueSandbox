@@ -1,4 +1,4 @@
-// GeoLocationData
+// Location Data
 export type GeoLocationData = {
   latitude: number | null;
   longitude: number | null;

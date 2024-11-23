@@ -1,5 +1,6 @@
 <script lang="ts">
 import { ref, watch } from "vue";
+import { addURLTimestampCache } from "@/utils/functions";
 import IconQuestion from "@/components/icons/useful/IconQuestion.vue";
 
 export default {
@@ -37,14 +38,17 @@ export default {
     });
     return { imageLoaded, onLoadImageError };
   },
+  methods: {
+    addURLTimestamp(url: string): string {
+      return addURLTimestampCache(url)
+    }
+  }
 };
 </script>
 
 <template>
-  <div class="image-container">
-    <img :src="urlImg" :alt="altImg" :class="cssClass" @error="onLoadImageError" :style="{ display: !imageLoaded && isShowErr ? 'none' : 'initial' }" />
-  </div>
-  <div class="rounded-full bg-gray-200 bg-opacity-60">
-    <IconQuestion v-if="!imageLoaded && isShowErr" :cssClass="errClass"></IconQuestion>
+  <img :src="addURLTimestamp(urlImg)" :alt="altImg" :class="cssClass" @error="onLoadImageError" :style="{ display: !imageLoaded && isShowErr ? 'none' : 'initial' }" />
+  <div v-if="!imageLoaded && isShowErr" :class="cssClass">
+    <IconQuestion :cssClass="errClass"></IconQuestion>
   </div>
 </template>

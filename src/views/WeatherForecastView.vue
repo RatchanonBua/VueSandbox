@@ -5,7 +5,9 @@
 import $ from "jquery";
 import { ref } from "vue";
 // Import Declarations
-import type { GeoLocationData } from "@/declarations/types";
+import type { GeoLocationData } from "@/utils/types";
+// Import Functions
+import { getDateStringByLang } from "@/utils/functions";
 // Import Stores
 import { useLocationStore } from "@/stores/location";
 // Import Icons
@@ -29,7 +31,8 @@ export default {
   },
   setup() {
     const locationStore = useLocationStore();
-    return { locationStore };
+    const getDateStrLang = getDateStringByLang;
+    return { locationStore, getDateStrLang };
   },
   methods: {
     async fetchLocation(): Promise<void> {
@@ -40,43 +43,12 @@ export default {
         console.log("Success: ", this.locationData);
       } catch (error: any) {
         this.errorMessage = error.message;
-        // console.log("Error: ", this.errorMessage);
+        console.log("Error: ", this.errorMessage);
       }
     },
     getCityNameByLocation(lat: number = 0, lon: number = 0): string {
       // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
       return "Bangkok, Thailand";
-    },
-    getDateStringByLang(lang: string = "th"): string {
-      // Initial Value
-      const locale: string = lang.toLowerCase();
-      const nowObj: Date = new Date();
-      // Process Value
-      let result: string = "";
-      switch (locale) {
-        case "th":
-          result = new Intl.DateTimeFormat("th-TH", { weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(nowObj);
-          break;
-        default:
-          const wkdayStr: string = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(nowObj);
-          const dateStr: number = nowObj.getDate();
-          const monthStr: string = new Intl.DateTimeFormat("en-US", { month: "long" }).format(nowObj);
-          const yearStr: string = new Intl.DateTimeFormat("en-US", { year: "numeric" }).format(nowObj);
-          const ordinalSuffix: string = dateStr % 10 === 1 && dateStr !== 11 ? "st" : dateStr % 10 === 2 && dateStr !== 12 ? "nd" : dateStr % 10 === 3 && dateStr !== 13 ? "rd" : "th";
-          result = `${wkdayStr}. ${dateStr}${ordinalSuffix} ${monthStr} ${yearStr}`;
-          break;
-      }
-      return result;
-    },
-    addURLTimestampCache(url: string): string {
-      try {
-        const urlObj = new URL(url);
-        urlObj.searchParams.append("ts", Date.now().toString());
-        return urlObj.toString();
-      } catch (error) {
-        console.error(`Invalid URL: ${url}`);
-        return url;
-      }
     },
   },
   computed: {
@@ -98,7 +70,7 @@ export default {
       <div class="flex grow">
         <div class="w-full">
           <h1 class="m-0 text-2xl font-semibold" id="city-str">{{ getCityNameByLocation() }}</h1>
-          <div class="empty" id="date-str">{{ getDateStringByLang("th") }}</div>
+          <div class="empty" id="date-str">{{ getDateStrLang("th") }}</div>
           <div class="empty" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
         </div>
         <div class="search-button">
@@ -112,7 +84,7 @@ export default {
         <!-- Current Temperature -->
         <div class="flex mt-4 mb-4 justify-center items-center bs-sm:w-1/2">
           <div class="my-4 rounded-full bg-gray-200 bg-opacity-60">
-            <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d@2x.png')" altImg="Forecast Icon" cssClass="h-[76px] aspect-square rounded-full" :isShowErr="true" errClass="h-[76px] aspect-square rounded-full p-3"></ImageComponent>
+            <ImageComponent urlImg="https://openweathermap.org/img/wn/10d@2x.png" altImg="Forecast Icon" cssClass="h-[76px] aspect-square rounded-full" :isShowErr="true" errClass="h-[76px] aspect-square rounded-full p-3"></ImageComponent>
           </div>
           <div class="ml-4 my-4">
             <div class="text-5xl font-bold text-right">25&deg;C</div>
@@ -156,49 +128,49 @@ export default {
           <WeatherHourItem>
             <template #time>03:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>15&deg;C</template>
           </WeatherHourItem>
           <WeatherHourItem>
             <template #time>06:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>20&deg;C</template>
           </WeatherHourItem>
           <WeatherHourItem>
             <template #time>09:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>25&deg;C</template>
           </WeatherHourItem>
           <WeatherHourItem>
             <template #time>12:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>30&deg;C</template>
           </WeatherHourItem>
           <WeatherHourItem>
             <template #time>15:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>35&deg;C</template>
           </WeatherHourItem>
           <WeatherHourItem>
             <template #time>18:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>25&deg;C</template>
           </WeatherHourItem>
           <WeatherHourItem>
             <template #time>21:00</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #value>15&deg;C</template>
           </WeatherHourItem>
@@ -215,7 +187,7 @@ export default {
             <template #low-value>15&deg;C</template>
             <template #high-value>35&deg;C</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #wind-value>30 km/h</template>
             <template #rain-value>0%</template>
@@ -228,7 +200,7 @@ export default {
             <template #low-value>15&deg;C</template>
             <template #high-value>35&deg;C</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #wind-value>30 km/h</template>
             <template #rain-value>0%</template>
@@ -241,7 +213,7 @@ export default {
             <template #low-value>15&deg;C</template>
             <template #high-value>35&deg;C</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #wind-value>30 km/h</template>
             <template #rain-value>0%</template>
@@ -254,7 +226,7 @@ export default {
             <template #low-value>15&deg;C</template>
             <template #high-value>35&deg;C</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #wind-value>30 km/h</template>
             <template #rain-value>0%</template>
@@ -267,7 +239,7 @@ export default {
             <template #low-value>15&deg;C</template>
             <template #high-value>35&deg;C</template>
             <template #image>
-              <ImageComponent :urlImg="addURLTimestampCache('https://openweathermap.org/img/wn/10d.png')" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+              <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
             </template>
             <template #wind-value>30 km/h</template>
             <template #rain-value>0%</template>
