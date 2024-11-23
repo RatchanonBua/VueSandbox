@@ -1,15 +1,14 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <!-- eslint-disable no-case-declarations -->
 <script lang="ts">
-// Import Libraries
-import $ from "jquery";
-import { ref } from "vue";
 // Import Declarations
 import type { GeoLocationData } from "@/utils/types";
 // Import Functions
 import { getDateStringByLang } from "@/utils/functions";
 // Import Stores
 import { useLocationStore } from "@/stores/location";
+// Import API
+import { fetchLocationString, fetchLocationCoords } from "@/api/location";
 // Import Icons
 import IconSearch from "@/components/icons/useful/IconSearch.vue";
 // Import Components
@@ -26,6 +25,7 @@ export default {
     return {
       locationData: null as GeoLocationData | null,
       errorMessage: null as string | null,
+      locationName: "กำลังโหลด..." as string | null,
       btnCSS: "text-white pt-0.5",
     };
   },
@@ -35,20 +35,48 @@ export default {
     return { locationStore, getDateStrLang };
   },
   methods: {
-    async fetchLocation(): Promise<void> {
+    async fetchLocationByGPS(): Promise<void> {
       try {
         await this.locationStore.initLocationService();
-        console.log("Before: ", this.locationData);
         this.locationData = this.locationStore.locationData;
-        console.log("Success: ", this.locationData);
+        // this.getCityNameByLocation(this.locationData.latitude, this.locationData.longitude);
+        this.getCityNameBySearchStr("Khu Khot");
       } catch (error: any) {
         this.errorMessage = error.message;
         console.log("Error: ", this.errorMessage);
       }
     },
-    getCityNameByLocation(lat: number = 0, lon: number = 0): string {
+    async getCityNameByLocation(lat: number | null = 0, lon: number | null = 0): Promise<void> {
       // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
-      return "Bangkok, Thailand";
+      try {
+        const result: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
+        const data: Record<string, any> = result.data;
+        console.log(result);
+        // Process Data
+        if ("local_names" in data && "th" in data.local_names) {
+          this.locationName = data.local_names.th;
+        } else {
+          this.locationName = data.data.name;
+        }
+      } catch (jqXHR) {
+        // this.locationName = "กำลังโหลด...";
+      }
+    },
+    async getCityNameBySearchStr(searchStr: string | null = ""): Promise<void> {
+      // console.log(`Search String: ${searchStr}`);
+      try {
+        const result: Record<string, any> = await fetchLocationString(String(searchStr));
+        const data: Record<string, any> = result.data;
+        console.log(result);
+        // Process Data
+        if ("local_names" in data && "th" in data.local_names) {
+          this.locationName = data.local_names.th;
+        } else {
+          this.locationName = data.data.name;
+        }
+      } catch (jqXHR) {
+        // this.locationName = "กำลังโหลด...";
+      }
     },
   },
   computed: {
@@ -69,12 +97,12 @@ export default {
       <!-- Location & Date -->
       <div class="flex grow">
         <div class="w-full">
-          <h1 class="m-0 text-2xl font-semibold" id="city-str">{{ getCityNameByLocation() }}</h1>
+          <h1 class="m-0 text-2xl font-semibold" id="city-str">{{ locationName }}</h1>
           <div class="empty" id="date-str">{{ getDateStrLang("th") }}</div>
-          <div class="empty" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
+          <div class="hidden" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
         </div>
         <div class="search-button">
-          <button class="w-6 h-6 rounded-full object-cover" @click="fetchLocation">
+          <button class="w-6 h-6 rounded-full object-cover" @click="fetchLocationByGPS">
             <IconSearch :cssClass="btnCSS" />
           </button>
         </div>
