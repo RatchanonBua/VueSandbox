@@ -28,7 +28,7 @@ export function addURLTimestampCache(url: string): string {
     const urlObj = new URL(url);
     urlObj.searchParams.append("ts", Date.now().toString());
     return urlObj.toString();
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Invalid URL: ${url}`);
     return url;
   }

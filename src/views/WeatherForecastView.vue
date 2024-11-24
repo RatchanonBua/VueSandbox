@@ -39,8 +39,8 @@ export default {
       try {
         await this.locationStore.initLocationService();
         this.locationData = this.locationStore.locationData;
-        // this.getCityNameByLocation(this.locationData.latitude, this.locationData.longitude);
-        this.getCityNameBySearchStr("Khu Khot");
+        this.getCityNameByLocation(this.locationData.latitude, this.locationData.longitude);
+        // this.getCityNameBySearchStr("Khu Khot");
       } catch (error: any) {
         this.errorMessage = error.message;
         console.log("Error: ", this.errorMessage);
@@ -51,15 +51,14 @@ export default {
       try {
         const result: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
         const data: Record<string, any> = result.data;
-        console.log(result);
-        // Process Data
-        if ("local_names" in data && "th" in data.local_names) {
-          this.locationName = data.local_names.th;
+        const name: string = result.full_name;
+        this.locationName = name;
+      } catch (errorObj: any) {
+        if (errorObj.errorType === "data") {
+          this.locationName = "ไม่พบข้อมูลพื้นที่";
         } else {
-          this.locationName = data.data.name;
+          this.locationName = "เกิดข้อผิดพลาด";
         }
-      } catch (jqXHR) {
-        // this.locationName = "กำลังโหลด...";
       }
     },
     async getCityNameBySearchStr(searchStr: string | null = ""): Promise<void> {
@@ -67,15 +66,14 @@ export default {
       try {
         const result: Record<string, any> = await fetchLocationString(String(searchStr));
         const data: Record<string, any> = result.data;
-        console.log(result);
-        // Process Data
-        if ("local_names" in data && "th" in data.local_names) {
-          this.locationName = data.local_names.th;
+        const name: string = result.full_name;
+        this.locationName = name;
+      } catch (errorObj: any) {
+        if (errorObj.errorType === "data") {
+          this.locationName = "ไม่พบข้อมูลพื้นที่";
         } else {
-          this.locationName = data.data.name;
+          this.locationName = "เกิดข้อผิดพลาด";
         }
-      } catch (jqXHR) {
-        // this.locationName = "กำลังโหลด...";
       }
     },
   },
@@ -101,7 +99,7 @@ export default {
           <div class="empty" id="date-str">{{ getDateStrLang("th") }}</div>
           <div class="hidden" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
         </div>
-        <div class="search-button">
+        <div class="search-button ml-4">
           <button class="w-6 h-6 rounded-full object-cover" @click="fetchLocationByGPS">
             <IconSearch :cssClass="btnCSS" />
           </button>
