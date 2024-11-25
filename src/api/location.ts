@@ -25,7 +25,7 @@ export function fetchLocationString(cityName: string = ""): Promise<object> {
         console.log("fetchLocationString Error:", jqXHR, textStatus, errorThrown);
         const errorMsg = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
-        reject({ errorType: "api", errorMsg: errorMsg, resultData: [], jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
+        reject({ errorType: "api", errorMsg: errorMsg, jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
     });
   });
@@ -56,7 +56,7 @@ export function fetchLocationCoords(latitude: number, longitude: number): Promis
         console.log("fetchLocationCoords Error:", jqXHR, textStatus, errorThrown);
         const errorMsg = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
-        reject({ errorType: "api", errorMsg: errorMsg, resultData: [], jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
+        reject({ errorType: "api", errorMsg: errorMsg, jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
     });
   });

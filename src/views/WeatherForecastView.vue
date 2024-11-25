@@ -9,6 +9,7 @@ import { getDateStringByLang } from "@/utils/functions";
 import { useLocationStore } from "@/stores/location";
 // Import API
 import { fetchLocationString, fetchLocationCoords } from "@/api/location";
+import { fetchCurrentWeather } from "@/api/weather";
 // Import Icons
 import IconXMark from "@/components/icons/useful/IconXMark.vue";
 import IconSearch from "@/components/icons/useful/IconSearch.vue";
@@ -25,9 +26,9 @@ export default {
   data() {
     return {
       searchStr: "",
-      locationData: null as GeoLocationData | null,
+      locGPSData: null as GeoLocationData | null,
       locationName: "กำลังโหลด...",
-      currWeatherData: null,
+      currWeatherData: null as Record<string, any> | null,
       nextWeatherData: null,
       dateWeatherData: null,
       errorGPSMessage: null as string | null,
@@ -69,8 +70,19 @@ export default {
         const locationResult: Record<string, any> = await fetchLocationString(String(searchStr));
         const locationData: Record<string, any> = locationResult.data;
         const locationName: string = locationResult.full_name;
-        this.locationName = locationName;
-        this.isShowCrossX = true;
+        if (typeof locationData?.lat === "number" && typeof locationData?.lon === "number") {
+          try {
+            const weatherResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
+            this.currWeatherData = weatherResult.obj;
+            this.locationName = locationName;
+            this.isShowCrossX = true;
+            this.isShowResult = true;
+          } catch (errorObj: any) {
+            this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น (${errorObj.errorMsg})`;
+          }
+        } else {
+          this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น (ERR_LOC: LAT/LON)`;
+        }
         // Weather Data
       } catch (errorObj: any) {
         if (errorObj.errorType === "data") {
@@ -85,8 +97,8 @@ export default {
       this.clearErrors();
       try {
         await this.locationStore.initLocationService();
-        this.locationData = this.locationStore.locationData;
-        this.getDataByLocationGPS(this.locationData.latitude, this.locationData.longitude);
+        this.locGPSData = this.locationStore.locationData;
+        this.getDataByLocationGPS(this.locGPSData.latitude, this.locGPSData.longitude);
       } catch (error: any) {
         this.errorGPSMessage = error.message;
         console.log("Error: ", this.errorGPSMessage);
@@ -99,12 +111,18 @@ export default {
         const locationResult: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
         const locationData: Record<string, any> = locationResult.data;
         const locationName: string = locationResult.full_name;
-        this.locationName = locationName;
-        this.isShowCrossX = true;
-        try {
-          const resultWeather = ""; // fetchCurrentWeather
-        } catch (errorObj: any) {
-          // 
+        if (typeof locationData?.lat === "number" && typeof locationData?.lon === "number") {
+          try {
+            const weatherResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
+            this.currWeatherData = weatherResult.obj;
+            this.locationName = locationName;
+            this.isShowCrossX = true;
+            this.isShowResult = true;
+          } catch (errorObj: any) {
+            this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น (${errorObj.errorMsg})`;
+          }
+        } else {
+          this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น (ERR_LOC: LAT/LON)`;
         }
         // this.isShowCrossX = true;
       } catch (errorObj: any) {
@@ -124,10 +142,13 @@ export default {
       return this.errorAPIMessage;
     },
     getLocationData() {
-      return this.locationData;
+      return this.locGPSData;
     },
     getLocationName() {
       return this.locationName;
+    },
+    getCurrWeatherData() {
+      return this.currWeatherData;
     },
     getDateString() {
       return this.dateStr;
@@ -211,38 +232,38 @@ export default {
             <!-- Current Temperature -->
             <div class="flex mt-4 mb-4 justify-center items-center bs-sm:w-1/2">
               <div class="my-4 rounded-full bg-gray-200 bg-opacity-60">
-                <ImageComponent urlImg="https://openweathermap.org/img/wn/10d@2x.png" altImg="Forecast Icon" cssClass="h-[76px] aspect-square rounded-full" :isShowErr="true" errClass="h-[76px] aspect-square rounded-full p-3"></ImageComponent>
+                <ImageComponent :urlImg="getCurrWeatherData?.icon ?? ''" altImg="Forecast Icon" cssClass="h-[76px] aspect-square rounded-full" :isShowErr="true" errClass="h-[76px] aspect-square rounded-full p-3"></ImageComponent>
               </div>
               <div class="ml-4 my-4">
-                <div class="text-5xl font-bold text-right">25&deg;C</div>
-                <div class="text-lg text-center">อากาศแจ่มใส</div>
+                <div class="text-5xl font-bold text-right">{{ getCurrWeatherData?.temp ?? "N/A" }}</div>
+                <div class="text-lg text-center">{{ getCurrWeatherData?.desc ?? "N/A" }}</div>
               </div>
             </div>
             <!-- Current Stats -->
             <div class="bs-sm:w-1/2">
               <div class="flex flex-wrap justify-around text-center mb-4 bs-sm:my-4 gap-y-2">
                 <CurrentStatsItem>
-                  <template #value>15&deg;C</template>
+                  <template #value>{{ getCurrWeatherData?.temp_min ?? "N/A" }}</template>
                   <template #label>ต่ำสุด</template>
                 </CurrentStatsItem>
                 <CurrentStatsItem>
-                  <template #value>30 km/h</template>
+                  <template #value>{{ getCurrWeatherData?.wind_speed ?? "N/A" }}</template>
                   <template #label>ความเร็วลม</template>
                 </CurrentStatsItem>
                 <CurrentStatsItem>
-                  <template #value>06:00</template>
+                  <template #value>{{ getCurrWeatherData?.sunrise ?? "N/A" }}</template>
                   <template #label>อาทิตย์ขึ้น</template>
                 </CurrentStatsItem>
                 <CurrentStatsItem>
-                  <template #value>35&deg;C</template>
+                  <template #value>{{ getCurrWeatherData?.temp_max ?? "N/A" }}</template>
                   <template #label>สูงสุด</template>
                 </CurrentStatsItem>
                 <CurrentStatsItem>
-                  <template #value>0%</template>
-                  <template #label>ปริมาณฝน</template>
+                  <template #value>{{ getCurrWeatherData?.humidity ?? "N/A" }}</template>
+                  <template #label>ความชื้น</template>
                 </CurrentStatsItem>
                 <CurrentStatsItem>
-                  <template #value>18:00</template>
+                  <template #value>{{ getCurrWeatherData?.sunset ?? "N/A" }}</template>
                   <template #label>อาทิตย์ตก</template>
                 </CurrentStatsItem>
               </div>
