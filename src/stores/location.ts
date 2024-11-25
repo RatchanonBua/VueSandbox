@@ -44,22 +44,27 @@ export const useLocationStore = defineStore("location", () => {
         resolve();
       },
       (error) => {
-        // Switch Error String = Default is 0: Unknown Error
+        // Error String
         let errorString = "UNKNOWN_ERROR";
+        let hasPermission = true;
         switch (error.code) {
-          case 0:
-            errorString = "UNKNOWN_ERROR";
+          case 1:
+            hasPermission = false;
+            errorString = "PERMISSION_DENIED";
             break;
-          case 4:
-            errorString = "INVALID_REQUEST";
+          case 2:
+            errorString = "POSITION_UNAVAILABLE";
+            break;
+          case 3:
+            errorString = "TIMEOUT";
             break;
           default:
-            errorString = error.message;
+            errorString = error.message.toUpperCase();
             break;
         }
         // Send Error String
         console.log("get-location-from-gps:retrieve-error", `Code:${error.code},String:${errorString}`);
-        const errorMessage = handleLocationError(true, true, errorString);
+        const errorMessage = handleLocationError(true, hasPermission, errorString);
         reject(new Error(errorMessage));
       },
       options

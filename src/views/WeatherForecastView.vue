@@ -24,13 +24,18 @@ export default {
   components: { IconXMark, IconSearch, ImageComponent, CurrentStatsItem, WeatherHourItem, WeatherNextItem },
   data() {
     return {
+      searchStr: "",
       locationData: null as GeoLocationData | null,
-      errorMessage: null as string | null,
-      locationName: "กำลังโหลด..." as string | null,
+      locationName: "กำลังโหลด...",
+      currWeatherData: null,
+      nextWeatherData: null,
+      dateWeatherData: null,
+      errorGPSMessage: null as string | null,
+      errorAPIMessage: null as string | null,
+      isShowResult: false,
+      isShowCrossX: false,
       btnCSS: "text-white pt-0.5",
-      isShowSearch: true,
-      haveSearched: true,
-      dateString: this.getDateStrLang("th"),
+      dateStr: this.getDateStrLang("th"),
     };
   },
   setup() {
@@ -39,57 +44,93 @@ export default {
     return { locationStore, getDateStrLang };
   },
   methods: {
+    toggleSearchArea(): void {
+      this.isShowResult = !this.isShowResult;
+    },
+    clearErrors(): void {
+      this.errorGPSMessage = null;
+      this.errorAPIMessage = null;
+    },
+    // Search Section
+    async fetchLocationByStr(): Promise<void> {
+      this.clearErrors();
+      this.searchStr = this.searchStr.trim();
+      if (this.searchStr.length === 0) {
+        this.errorAPIMessage = "กรุณาระบุชื่อสถานที่";
+      } else {
+        this.getDataByLocationStr(this.searchStr);
+      }
+    },
+    async getDataByLocationStr(searchStr: string | null = ""): Promise<void> {
+      // console.log(`Search String: ${searchStr}`);
+      this.clearErrors();
+      try {
+        // Location Data
+        const locationResult: Record<string, any> = await fetchLocationString(String(searchStr));
+        const locationData: Record<string, any> = locationResult.data;
+        const locationName: string = locationResult.full_name;
+        this.locationName = locationName;
+        this.isShowCrossX = true;
+        // Weather Data
+      } catch (errorObj: any) {
+        if (errorObj.errorType === "data") {
+          this.errorAPIMessage = `ไม่พบข้อมูลสถานที่`;
+        } else {
+          this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น ${errorObj.errorMsg}`;
+        }
+      }
+    },
+    // GPS Section
     async fetchLocationByGPS(): Promise<void> {
+      this.clearErrors();
       try {
         await this.locationStore.initLocationService();
         this.locationData = this.locationStore.locationData;
-        this.getCityNameByLocation(this.locationData.latitude, this.locationData.longitude);
-        // this.getCityNameBySearchStr("Khu Khot");
+        this.getDataByLocationGPS(this.locationData.latitude, this.locationData.longitude);
       } catch (error: any) {
-        this.errorMessage = error.message;
-        console.log("Error: ", this.errorMessage);
+        this.errorGPSMessage = error.message;
+        console.log("Error: ", this.errorGPSMessage);
       }
     },
-    async getCityNameByLocation(lat: number | null = 0, lon: number | null = 0): Promise<void> {
+    async getDataByLocationGPS(lat: number | null = 0, lon: number | null = 0): Promise<void> {
       // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+      this.clearErrors();
       try {
-        const result: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
-        const data: Record<string, any> = result.data;
-        const name: string = result.full_name;
-        this.locationName = name;
+        const locationResult: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
+        const locationData: Record<string, any> = locationResult.data;
+        const locationName: string = locationResult.full_name;
+        this.locationName = locationName;
+        this.isShowCrossX = true;
+        try {
+          const resultWeather = ""; // fetchCurrentWeather
+        } catch (errorObj: any) {
+          // 
+        }
+        // this.isShowCrossX = true;
       } catch (errorObj: any) {
         if (errorObj.errorType === "data") {
-          this.locationName = "ไม่พบข้อมูลพื้นที่";
+          this.errorAPIMessage = `ไม่พบข้อมูลสถานที่`;
         } else {
-          this.locationName = "เกิดข้อผิดพลาด";
+          this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น (${errorObj.errorMsg})`;
         }
       }
-    },
-    async getCityNameBySearchStr(searchStr: string | null = ""): Promise<void> {
-      // console.log(`Search String: ${searchStr}`);
-      try {
-        const result: Record<string, any> = await fetchLocationString(String(searchStr));
-        const data: Record<string, any> = result.data;
-        const name: string = result.full_name;
-        this.locationName = name;
-      } catch (errorObj: any) {
-        if (errorObj.errorType === "data") {
-          this.locationName = "ไม่พบข้อมูลพื้นที่";
-        } else {
-          this.locationName = "เกิดข้อผิดพลาด";
-        }
-      }
-    },
-    toggleSearchArea(): void {
-      this.isShowSearch = !this.isShowSearch;
     },
   },
   computed: {
+    getGPSErrorMessage() {
+      return this.errorGPSMessage;
+    },
+    getAPIErrorMessage() {
+      return this.errorAPIMessage;
+    },
     getLocationData() {
       return this.locationData;
     },
-    getErrorMessage() {
-      return this.errorMessage;
+    getLocationName() {
+      return this.locationName;
+    },
+    getDateString() {
+      return this.dateStr;
     },
   },
 };
@@ -99,14 +140,14 @@ export default {
   <div class="min-h-screen px-4 pt-4 pb-12 text-white bg-no-repeat bg-fixed bg-gradient-to-b from-blue-900 to-blue-500 dark:from-gray-900 dark:to-gray-500">
     <!-- Search Area -->
     <transition name="fade" mode="out-in">
-      <div class="relative" v-show="isShowSearch">
+      <div class="relative" v-show="!isShowResult">
         <!-- Parent Container with padding -->
         <div class="forecast-search">
           <div class="flex justify-center items-center min-h-screen -mt-4 -mb-12">
             <div class="w-full max-w-lg p-4 bg-opacity-20 bg-black shadow-lg rounded-lg">
               <div class="relative">
                 <div class="absolute w-full -top-1 text-right">
-                  <button class="w-6 h-6 rounded-full object-cover" :style="{ visibility: haveSearched ? 'visible' : 'hidden' }" @click="toggleSearchArea">
+                  <button class="w-6 h-6 rounded-full object-cover" :style="{ visibility: isShowCrossX ? 'visible' : 'hidden' }" @click="toggleSearchArea">
                     <IconXMark :cssClass="btnCSS" />
                   </button>
                 </div>
@@ -119,12 +160,15 @@ export default {
                   <h3 class="text-lg font-semibold text-center pb-2">ค้นหาสถานที่โดยใส่ชื่อเมือง</h3>
                   <div class="flex items-center space-x-2 box-border">
                     <!-- Search Bar -->
-                    <input type="text" placeholder="ค้นหาชื่อเมือง" class="h-12 w-full px-4 py-2 text-black dark:text-white dark:bg-opacity-20 dark:bg-black border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border" />
+                    <input type="text" v-model="searchStr" placeholder="ค้นหาชื่อเมือง" class="h-12 w-full px-4 py-2 text-black dark:text-white dark:bg-opacity-20 dark:bg-black border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border" />
                     <!-- Search Button with icon -->
-                    <button class="flex items-center justify-center h-12 px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 box-border">
+                    <button @click="fetchLocationByStr" class="flex items-center justify-center h-12 px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 box-border">
                       <IconSearch class="w-6 h-6 text-white" />
                     </button>
                   </div>
+                </div>
+                <div class="error-api-group" v-if="getAPIErrorMessage">
+                  <div class="text-red-400 font-semibold text-center whitespace-pre-line">{{ getAPIErrorMessage }}</div>
                 </div>
                 <div class="separator-group">
                   <div class="flex justify-center items-center space-x-2">
@@ -134,7 +178,10 @@ export default {
                   </div>
                 </div>
                 <div class="button-group">
-                  <button class="w-full px-6 py-2 text-white font-medium bg-green-500 hover:bg-green-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 box-border">ระบุสถานที่ปัจจุบันโดยใช้ GPS</button>
+                  <button @click="fetchLocationByGPS" class="w-full px-6 py-2 text-white font-medium bg-green-500 hover:bg-green-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 box-border">ระบุสถานที่ปัจจุบันโดยใช้ GPS</button>
+                </div>
+                <div class="error-gps-group" v-if="getGPSErrorMessage">
+                  <div class="text-red-400 font-semibold text-center whitespace-pre-line">{{ getGPSErrorMessage }}</div>
                 </div>
               </div>
             </div>
@@ -144,13 +191,13 @@ export default {
     </transition>
     <!-- Result Area -->
     <transition name="fade" mode="out-in">
-      <div class="relative" v-show="!isShowSearch">
+      <div class="relative" v-show="isShowResult">
         <div class="forecast-result">
           <!-- Location & Date -->
           <div class="flex grow">
             <div class="w-full">
-              <h1 class="m-0 text-2xl font-semibold" id="city-str">{{ locationName }}</h1>
-              <div class="empty" id="date-str">{{ dateString }}</div>
+              <h1 class="m-0 text-xl font-semibold" id="city-str">{{ getLocationName }}</h1>
+              <div class="text-sm" id="date-str">{{ getDateString }}</div>
               <div class="hidden" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
             </div>
             <div class="search-button ml-4 text-right">
@@ -203,7 +250,7 @@ export default {
           </div>
           <!-- Weather by Hour -->
           <div class="hidden bs-sm:block">
-            <h2 class="pb-2 text-base text-white text-opacity-80">สภาพอากาศวันนี้</h2>
+            <h2 class="pb-2 text-base text-white text-opacity-80">สภาพอากาศชั่วโมงถัดไป</h2>
             <div class="grid grid-cols-7 gap-2 pb-2">
               <WeatherHourItem>
                 <template #time>03:00</template>
@@ -258,7 +305,7 @@ export default {
           </div>
           <!-- Future Forecast -->
           <div class="w-full">
-            <h2 class="pb-2 text-base text-white text-opacity-80">สภาพอากาศในอีก 5 วัน</h2>
+            <h2 class="pb-2 text-base text-white text-opacity-80">พยากรณ์อากาศในวันอื่น</h2>
             <div class="flex flex-wrap">
               <!-- Start:Item 1 -->
               <WeatherNextItem>

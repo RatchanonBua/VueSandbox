@@ -9,21 +9,23 @@ export function fetchLocationString(cityName: string = ""): Promise<object> {
     $.ajax({
       url: apiUrl,
       method: "GET",
-      type: "json",
+      dataType: "json",
       timeout: 5000,
       data: { q: cityName, limit: 1, appid: apiKey },
-      success: function (resultLocData) {
+      success: async function (resultLocData) {
         if (Array.isArray(resultLocData) && resultLocData.length === 1) {
-          // Extend Function
-          getCityNameWithCountry(resultLocData, resolve);
+          const locationObj: Record<string, any> = resultLocData[0];
+          const locationName = await getCityNameWithCountry(locationObj);
+          resolve({ data: locationObj, full_name: locationName });
         } else {
-          reject({ errorType: "data", resultData: resultLocData });
+          reject({ errorType: "data", errorMsg: "DATA_NOT_FOUND", resultData: resultLocData });
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        console.log("OpenWeather Error:", jqXHR, textStatus, errorThrown);
+        console.log("fetchLocationString Error:", jqXHR, textStatus, errorThrown);
+        const errorMsg = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
-        reject({ errorType: "api", resultData: [], jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
+        reject({ errorType: "api", errorMsg: errorMsg, resultData: [], jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
     });
   });
@@ -38,31 +40,32 @@ export function fetchLocationCoords(latitude: number, longitude: number): Promis
     $.ajax({
       url: apiUrl,
       method: "GET",
-      type: "json",
+      dataType: "json",
       timeout: 5000,
       data: { lat: latitude, lon: longitude, limit: 1, appid: apiKey },
-      success: function (resultLocData) {
+      success: async function (resultLocData) {
         if (Array.isArray(resultLocData) && resultLocData.length === 1) {
-          // Extend Function
-          getCityNameWithCountry(resultLocData, resolve);
+          const locationObj: Record<string, any> = resultLocData[0];
+          const locationName = await getCityNameWithCountry(locationObj);
+          resolve({ data: locationObj, full_name: locationName });
         } else {
-          reject({ errorType: "data", resultData: resultLocData });
+          reject({ errorType: "data", errorMsg: "DATA_NOT_FOUND", resultData: resultLocData });
         }
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        console.log("OpenWeather Error:", jqXHR, textStatus, errorThrown);
+        console.log("fetchLocationCoords Error:", jqXHR, textStatus, errorThrown);
+        const errorMsg = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
-        reject({ errorType: "api", resultData: [], jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
+        reject({ errorType: "api", errorMsg: errorMsg, resultData: [], jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
     });
   });
 }
 // Get Country Name (Extend Function) => if not possible then result is city name only
-async function getCityNameWithCountry(resultLocData: Record<string, any>, resolve: Function, lang: string = "th"): Promise<void> {
+async function getCityNameWithCountry(locationObj: Record<string, any>, lang: string = "th"): Promise<string> {
   // REST Countries API
   const codeUrl = import.meta.env.VITE_COUNTRIES_ALPHA;
   // Process Data
-  const locationObj: Record<string, any> = resultLocData[0];
   const countryCode: string | null = locationObj?.country ? String(locationObj.country) : null;
   // Init City Name
   const getCityName = (): string => {
@@ -76,7 +79,7 @@ async function getCityNameWithCountry(resultLocData: Record<string, any>, resolv
   let locationName: string = getCityName();
   // No Country Code
   if (!countryCode) {
-    return resolve({ data: locationObj, full_name: locationName });
+    return locationName;
   }
   // Fetch Country Data
   try {
@@ -105,9 +108,9 @@ async function getCityNameWithCountry(resultLocData: Record<string, any>, resolv
     } else {
       locationName = resultLocName;
     }
-    return resolve({ data: locationObj, full_name: locationName });
+    return locationName;
   } catch (error: any) {
     console.log("REST Countries Error:", error?.jqXHR, error?.textStatus, error?.errorThrown);
-    return resolve({ data: locationObj, full_name: locationName });
+    return locationName;
   }
 }

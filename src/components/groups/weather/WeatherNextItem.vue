@@ -7,7 +7,7 @@
       <span class="text-lg">
         <slot name="date-wkday"></slot>
       </span>
-      <div class="text-white text-opacity-60 text-base">
+      <div class="text-white text-sm text-opacity-60">
         <slot name="date-label"></slot>
       </div>
     </div>
@@ -16,14 +16,14 @@
       <span class="text-lg">
         <slot name="low-value"></slot>
       </span>
-      <div class="text-white text-opacity-60 text-base">ต่ำสุด</div>
+      <div class="text-white text-sm text-opacity-60">ต่ำสุด</div>
     </div>
     <!-- High Temp. -->
     <div class="w-1/3 bs-sm:w-1/6">
       <span class="text-lg">
         <slot name="high-value"></slot>
       </span>
-      <div class="text-white text-opacity-60 text-base">สูงสุด</div>
+      <div class="text-white text-sm text-opacity-60">สูงสุด</div>
     </div>
     <!-- Icon -->
     <div class="w-1/3 bs-sm:w-1/6 bs-sm:-order-1">
@@ -36,14 +36,14 @@
       <span class="text-lg">
         <slot name="wind-value"></slot>
       </span>
-      <div class="text-white text-opacity-60 text-base">ความเร็วลม</div>
+      <div class="text-white text-sm text-opacity-60">ความเร็วลม</div>
     </div>
     <!-- Rain -->
     <div class="w-1/3 bs-sm:w-1/6">
       <span class="text-lg">
         <slot name="rain-value"></slot>
       </span>
-      <div class="text-white text-opacity-60 text-base">ปริมาณฝน</div>
+      <div class="text-white text-sm text-opacity-60">ความชื้น</div>
     </div>
   </div>
 </template>
