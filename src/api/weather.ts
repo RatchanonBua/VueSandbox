@@ -14,7 +14,7 @@ export function fetchCurrentWeather(latitude: number, longitude: number, unit: s
       data: { lat: latitude, lon: longitude, units: unit, lang: lang, appid: apiKey },
       success: function (weatherData) {
         const weatherObj = processCurrentWeather(weatherData);
-        // console.log({ data: weatherData, obj: weatherObj });
+        console.log("Weather Data:", { data: weatherData, obj: weatherObj });
         resolve({ data: weatherData, obj: weatherObj });
       },
       error: function (jqXHR, textStatus, errorThrown) {
@@ -43,7 +43,7 @@ export function fetchThreeHourWeather(latitude: number, longitude: number, unit:
   });
 }
 
-function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "metric", lang: string = "th"): object {
+function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "metric"): object {
   // Initial Func
   const formatTempData = (temp: number | undefined, unit: string): string => {
     if (typeof temp !== "number") return "N/A";
@@ -81,7 +81,7 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
     return `${hString}:${mString}`;
   };
   // Initial Data
-  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null };
+  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null };
   // Location Data
   resultData.lat = weatherObj?.coord?.lat ?? null;
   resultData.lon = weatherObj?.coord?.lon ?? null;
@@ -92,18 +92,18 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
   // Weather Data
   resultData.humidity = weatherObj?.main?.humidity ? `${weatherObj.main.humidity}%` : "N/A";
   resultData.temp = formatTempData(weatherObj?.main?.temp, unit);
+  resultData.feels_like = formatTempData(weatherObj?.main?.feels_like, unit);
   resultData.temp_min = formatTempData(weatherObj?.main?.temp_min, unit);
   resultData.temp_max = formatTempData(weatherObj?.main?.temp_max, unit);
   resultData.wind_speed = formatSpeedData(weatherObj?.wind?.speed, unit);
   // Time Data
   if (typeof weatherObj?.dt === "number" && typeof weatherObj?.timezone === "number") {
     // Timestamp & Timezone
-    resultData.dt = weatherObj.dt + weatherObj.timezone;
+    resultData.dt = weatherObj.dt;
     // Sunrise & Sunset
     resultData.sunrise = formatTimeData(weatherObj?.sys?.sunrise, weatherObj.timezone);
     resultData.sunset = formatTimeData(weatherObj?.sys?.sunset, weatherObj.timezone);
   }
   // Return Data
-  // console.log("Weather:", resultData);
   return resultData;
 }

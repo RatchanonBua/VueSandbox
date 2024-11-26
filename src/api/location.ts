@@ -11,9 +11,10 @@ export function fetchLocationString(cityName: string = ""): Promise<object> {
       method: "GET",
       dataType: "json",
       timeout: 5000,
-      data: { q: cityName, limit: 1, appid: apiKey },
+      data: { q: cityName, appid: apiKey },
       success: async function (resultLocData) {
-        if (Array.isArray(resultLocData) && resultLocData.length === 1) {
+        console.log("Location Data:", resultLocData);
+        if (Array.isArray(resultLocData) && resultLocData.length > 0) {
           const locationObj: Record<string, any> = resultLocData[0];
           const locationName = await getCityNameWithCountry(locationObj);
           resolve({ data: locationObj, full_name: locationName });
@@ -42,9 +43,10 @@ export function fetchLocationCoords(latitude: number, longitude: number): Promis
       method: "GET",
       dataType: "json",
       timeout: 5000,
-      data: { lat: latitude, lon: longitude, limit: 1, appid: apiKey },
+      data: { lat: latitude, lon: longitude, appid: apiKey },
       success: async function (resultLocData) {
-        if (Array.isArray(resultLocData) && resultLocData.length === 1) {
+        console.log("Location Data:", resultLocData);
+        if (Array.isArray(resultLocData) && resultLocData.length > 0) {
           const locationObj: Record<string, any> = resultLocData[0];
           const locationName = await getCityNameWithCountry(locationObj);
           resolve({ data: locationObj, full_name: locationName });
@@ -83,7 +85,7 @@ async function getCityNameWithCountry(locationObj: Record<string, any>, lang: st
   }
   // Fetch Country Data
   try {
-    console.log(`REST Countries URL: ${codeUrl}/${countryCode}`);
+    // console.log(`REST Countries URL: ${codeUrl}/${countryCode}`);
     const resultCodeData = await $.ajax({
       url: `${codeUrl}/${countryCode}`,
       method: "GET",

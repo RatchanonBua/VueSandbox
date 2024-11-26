@@ -43,7 +43,7 @@
       <span class="text-lg">
         <slot name="rain-value"></slot>
       </span>
-      <div class="text-white text-sm text-opacity-60">ความชื้น</div>
+      <div class="text-white text-sm text-opacity-60">ค่าความชื้น</div>
     </div>
   </div>
 </template>
