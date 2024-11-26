@@ -71,17 +71,24 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
     }
   };
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const formatTimeData = (timestamp: number | undefined, dataOffset: number): string => {
-    if (typeof timestamp !== "number") return "N/A";
-    const currOffset = new Date().getTimezoneOffset() * 60;
-    const dateObject = new Date((timestamp + (dataOffset + currOffset)) * 1000);
-    const hString = String(dateObject.getHours()).padStart(2, "0");
-    const mString = String(dateObject.getMinutes()).padStart(2, "0");
-    // console.log(timestamp, dataOffset, currOffset, dateObject);
+  const deviceOffset = new Date().getTimezoneOffset() * 60;
+  const formatTimeData = (timestampUTC: number | undefined, timezoneOffset: number): string => {
+    if (typeof timestampUTC !== "number") return "N/A";
+    // Date Object (with Timestamp at UTC+0)
+    const dateObject = new Date(timestampUTC * 1000);
+    // UTC+0 Data
+    const hUTCNum = dateObject.getUTCHours();
+    const mUTCNum = dateObject.getUTCMinutes();
+    const adjustedH = (hUTCNum + Math.floor(timezoneOffset / 3600)) % 24;
+    const adjustedM = (mUTCNum + Math.floor((timezoneOffset % 3600) / 60)) % 60; 
+    // Format String
+    const hString = String(adjustedH).padStart(2, "0");
+    const mString = String(adjustedM).padStart(2, "0");
+    // console.log(timestampUTC, timezoneOffset, deviceOffset, dateObject);
     return `${hString}:${mString}`;
   };
   // Initial Data
-  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null };
+  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, curr_offset: currOffset, data_offset: null as number | null };
   // Location Data
   resultData.lat = weatherObj?.coord?.lat ?? null;
   resultData.lon = weatherObj?.coord?.lon ?? null;
@@ -100,6 +107,8 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
   if (typeof weatherObj?.dt === "number" && typeof weatherObj?.timezone === "number") {
     // Timestamp & Timezone
     resultData.dt = weatherObj.dt;
+    resultData.curr_offset = deviceOffset;
+    resultData.data_offset = weatherObj.timezone;
     // Sunrise & Sunset
     resultData.sunrise = formatTimeData(weatherObj?.sys?.sunrise, weatherObj.timezone);
     resultData.sunset = formatTimeData(weatherObj?.sys?.sunset, weatherObj.timezone);
