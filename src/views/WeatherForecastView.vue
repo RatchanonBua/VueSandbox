@@ -9,7 +9,7 @@ import { getDateTimeStringByLang } from "@/utils/functions";
 import { useLocationStore } from "@/stores/location";
 // Import API
 import { fetchLocationString, fetchLocationCoords } from "@/api/location";
-import { fetchCurrentWeather } from "@/api/weather";
+import { fetchCurrentWeather, fetchThreeHourWeather } from "@/api/weather";
 // Import Icons
 import IconXMark from "@/components/icons/useful/IconXMark.vue";
 import IconSearch from "@/components/icons/useful/IconSearch.vue";
@@ -94,8 +94,8 @@ export default {
         const locationName: string = locationResult.full_name;
         if (typeof locationData?.lat === "number" && typeof locationData?.lon === "number") {
           try {
-            const weatherResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
-            this.currWeatherData = weatherResult.obj;
+            const weatherCurrResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
+            this.currWeatherData = weatherCurrResult.obj;
             this.locationName = locationName;
             this.isShowCrossX = true;
             this.isShowResult = true;
@@ -139,8 +139,8 @@ export default {
         const locationName: string = locationResult.full_name;
         if (typeof locationData?.lat === "number" && typeof locationData?.lon === "number") {
           try {
-            const weatherResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
-            this.currWeatherData = weatherResult.obj;
+            const weatherCurrResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
+            this.currWeatherData = weatherCurrResult.obj;
             this.locationName = locationName;
             this.isShowCrossX = true;
             this.isShowResult = true;
@@ -159,6 +159,11 @@ export default {
       } finally {
         // this.toggleLoadData("gps", false);
       }
+    },
+    // Test Function
+    async fetchLocation3Hour(): Promise<void> {
+      console.log("Test Function");
+      const weatherHourResult = await fetchThreeHourWeather(13.9508265, 100.6333279);
     },
   },
   computed: {
@@ -258,7 +263,7 @@ export default {
               <div class="hidden" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
             </div>
             <div class="search-button ml-4 text-right">
-              <button class="w-6 h-6 rounded-full object-cover" @click="toggleSearchArea">
+              <button class="w-6 h-6 rounded-full object-cover" @click="fetchLocation3Hour">
                 <IconSearch :cssClass="btnCSS" />
               </button>
             </div>

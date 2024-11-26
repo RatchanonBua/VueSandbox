@@ -46,3 +46,46 @@ export function addURLTimestampCache(url: string): string {
     return "";
   }
 }
+// Format Temperature Data
+export function formatTemperatureData(temp: number | undefined, unit: string): string {
+  if (typeof temp !== "number") return "N/A";
+  switch (unit) {
+    case "standard":
+      return `${temp.toFixed(1)} K`;
+    case "metric":
+      return `${temp.toFixed(1)}°C`;
+    case "imperial":
+      return `${temp.toFixed(1)}°F`;
+    default:
+      return "N/A";
+  }
+}
+// Format Wind Speed Data (standard & metric is meters/sec to kilometers/hous, imperial is miles/hour)
+export function formatWindSpeedData(speed: number | undefined, unit: string): string {
+  if (typeof speed !== "number") return "N/A";
+  switch (unit) {
+    case "standard":
+    case "metric":
+      return `${(speed * 3.6).toFixed(1)} km/h`;
+    case "imperial":
+      return `${speed.toFixed(1)} mph`;
+    default:
+      return "N/A";
+  }
+}
+// Format Timestamp Data (timestamp is UTC "second" timestamp, timezone is offset ex. 3600 = UTC+1)
+export function formatTimestampData(timestamp: number | undefined, timezone: number): string {
+  if (typeof timestamp !== "number") return "N/A";
+  // Date Object (Seconds to Milliseconds)
+  const dateObject = new Date(timestamp * 1000);
+  // Adjust Data with Timezone
+  const hUTCNum = dateObject.getUTCHours();
+  const mUTCNum = dateObject.getUTCMinutes();
+  const adjustedH = (hUTCNum + Math.floor(timezone / 3600)) % 24;
+  const adjustedM = (mUTCNum + Math.floor((timezone % 3600) / 60)) % 60;
+  // Format String
+  const hString = String(adjustedH).padStart(2, "0");
+  const mString = String(adjustedM).padStart(2, "0");
+  // Return Data
+  return `${hString}:${mString}`;
+}

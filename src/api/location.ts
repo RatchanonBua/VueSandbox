@@ -13,7 +13,7 @@ export function fetchLocationString(cityName: string = ""): Promise<object> {
       timeout: 5000,
       data: { q: cityName, appid: apiKey },
       success: async function (resultLocData) {
-        console.log("Location Data:", resultLocData);
+        // console.log("Location Data:", resultLocData);
         if (Array.isArray(resultLocData) && resultLocData.length > 0) {
           const locationObj: Record<string, any> = resultLocData[0];
           const locationName = await getCityNameWithCountry(locationObj);
@@ -45,7 +45,7 @@ export function fetchLocationCoords(latitude: number, longitude: number): Promis
       timeout: 5000,
       data: { lat: latitude, lon: longitude, appid: apiKey },
       success: async function (resultLocData) {
-        console.log("Location Data:", resultLocData);
+        // console.log("Location Data:", resultLocData);
         if (Array.isArray(resultLocData) && resultLocData.length > 0) {
           const locationObj: Record<string, any> = resultLocData[0];
           const locationName = await getCityNameWithCountry(locationObj);
@@ -84,6 +84,7 @@ async function getCityNameWithCountry(locationObj: Record<string, any>, lang: st
     return locationName;
   }
   // Fetch Country Data
+  const locationWithCode = `${locationName}${locationObj?.country ? `, ${locationObj.country}` : ""}`;
   try {
     // console.log(`REST Countries URL: ${codeUrl}/${countryCode}`);
     const resultCodeData = await $.ajax({
@@ -97,7 +98,7 @@ async function getCityNameWithCountry(locationObj: Record<string, any>, lang: st
     const countryCommonName: string = countryData?.name?.common ?? ""; /** English Name (String) **/
     const countryNativeName: Record<string, any> = countryData?.name?.nativeName; /** Name Object (Object) **/
     // Check Country Data
-    const resultLocName = locationObj?.name ? (countryCommonName ? `${locationObj.name}, ${countryCommonName}` : locationName) : "???";
+    const resultLocName = locationObj?.name ? (countryCommonName ? `${locationObj.name}, ${countryCommonName}` : locationWithCode) : "???";
     if (countryNativeName) {
       switch (lang) {
         case "th":
@@ -113,6 +114,6 @@ async function getCityNameWithCountry(locationObj: Record<string, any>, lang: st
     return locationName;
   } catch (error: any) {
     console.log("REST Countries Error:", error?.jqXHR, error?.textStatus, error?.errorThrown);
-    return locationName;
+    return locationWithCode;
   }
 }
