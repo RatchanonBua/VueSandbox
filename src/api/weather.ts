@@ -88,7 +88,7 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
     return `${hString}:${mString}`;
   };
   // Initial Data
-  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, curr_offset: currOffset, data_offset: null as number | null };
+  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, curr_offset: deviceOffset, data_offset: null as number | null };
   // Location Data
   resultData.lat = weatherObj?.coord?.lat ?? null;
   resultData.lon = weatherObj?.coord?.lon ?? null;
@@ -107,7 +107,6 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
   if (typeof weatherObj?.dt === "number" && typeof weatherObj?.timezone === "number") {
     // Timestamp & Timezone
     resultData.dt = weatherObj.dt;
-    resultData.curr_offset = deviceOffset;
     resultData.data_offset = weatherObj.timezone;
     // Sunrise & Sunset
     resultData.sunrise = formatTimeData(weatherObj?.sys?.sunrise, weatherObj.timezone);
