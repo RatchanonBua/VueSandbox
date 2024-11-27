@@ -14,13 +14,13 @@ export function fetchCurrentWeather(latitude: number, longitude: number, unit: s
       timeout: 5000,
       data: { lat: latitude, lon: longitude, units: unit, lang: lang, appid: apiKey },
       success: function (weatherData) {
-        const weatherObj = processCurrentWeather(weatherData, unit, lang);
+        const weatherObj: object = processCurrentWeather(weatherData, unit, lang);
         // console.log("Weather Data:", { data: weatherData, obj: weatherObj });
         resolve({ data: weatherData, obj: weatherObj });
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log("fetchCurrentWeather Error:", jqXHR, textStatus, errorThrown);
-        const errorMsg = `ERR_WDT: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
+        const errorMsg: string = `ERR_WDT: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
         reject({ errorType: "api", errorMsg: errorMsg, jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
@@ -41,13 +41,13 @@ export function fetchThreeHourWeather(latitude: number, longitude: number, unit:
       timeout: 5000,
       data: { lat: latitude, lon: longitude, units: unit, lang: lang, appid: apiKey },
       success: function (weatherData) {
-        const weatherObj = processThreeHourWeather(weatherData, unit, lang);
-        console.log("Weather Data:", { data: weatherData, obj: weatherObj });
+        const weatherObj: object = processThreeHourWeather(weatherData, unit, lang);
+        // console.log("Weather Data:", { data: weatherData, obj: weatherObj });
         resolve({ data: weatherData, obj: weatherObj });
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log("fetchThreeHourWeather Error:", jqXHR, textStatus, errorThrown);
-        const errorMsg = `ERR_WDT: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
+        const errorMsg: string = `ERR_WDT: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
         reject({ errorType: "api", errorMsg: errorMsg, jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
@@ -57,8 +57,8 @@ export function fetchThreeHourWeather(latitude: number, longitude: number, unit:
 
 function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "metric", lang: string = "th"): object {
   // Initial Data
-  const deviceOffset = new Date().getTimezoneOffset() * 60;
-  const resultData = { lat: null, lon: null, curr_tz: deviceOffset, data_tz: null as number | null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", humidity: "N/A", wind_speed: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, dt_str: null as string | null };
+  const deviceOffset: number = new Date().getTimezoneOffset() * 60;
+  const resultData: Record<string, any> = { lat: null, lon: null, curr_tz: deviceOffset, data_tz: null as number | null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", humidity: "N/A", wind_speed: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, dt_str: null as string | null };
   // Location Data
   resultData.lat = weatherObj?.coord?.lat ?? null;
   resultData.lon = weatherObj?.coord?.lon ?? null;
@@ -89,39 +89,38 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
 
 function processThreeHourWeather(weatherObj: Record<string, any>, unit: string = "metric", lang: string = "th"): object {
   // Initial Data
-  const deviceOffset = new Date().getTimezoneOffset() * 60;
-  const resultData = { curr: null as Record<string, any> | null, next: null as Record<string, any> | null, date: null as Record<string, any> | null };
+  const deviceOffset: number = new Date().getTimezoneOffset() * 60;
+  const resultData: Record<string, any> = { next: null as Record<string, any> | null, date: null as Record<string, any> | null };
   // Check Timezone Exist
   if (typeof weatherObj?.city?.timezone === "number") {
     // Process Main Data
-    const latitude = weatherObj.city.coord?.lat ?? null;
-    const longitude = weatherObj.city.coord?.lon ?? null;
-    const timezone = weatherObj.city.timezone;
-    // Process Curr Data
-    if (Array.isArray(weatherObj.list) && weatherObj.list.length > 0) {
-      // Init Section
-      resultData.curr = { lat: latitude, lon: longitude, curr_tz: deviceOffset, data_tz: timezone, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", humidity: "N/A", wind_speed: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, dt_str: null as string | null };
-      // Access Values
-      const dataObj = weatherObj.list[0];
-      const descObj = dataObj.weather ? dataObj.weather[0] : null;
-      // Process Values
-      const resultObj = createWeatherResultObject(dataObj, descObj, unit, lang, timezone);
-      // Push Value
-      resultData.curr = resultObj;
-    }
+    const latitude: number | null = weatherObj.city.coord?.lat ?? null;
+    const longitude: number | null = weatherObj.city.coord?.lon ?? null;
+    const timezone: number = weatherObj.city.timezone;
     // Process Next Data
     if (Array.isArray(weatherObj.list) && weatherObj.list.length > 0) {
       // Init Section
       resultData.next = { lat: latitude, lon: longitude, curr_tz: deviceOffset, data_tz: timezone, list: [] };
       // Loop Section
-      const listData = weatherObj.list;
-      const loopLimit = Math.min(listData.length, 7);
-      for (let index = 0; index < loopLimit; index++) {
+      const listData: any[] = weatherObj.list;
+      const loopLimit: number = Math.min(listData.length, 7);
+      for (let index: number = 0; index < loopLimit; index++) {
         // Access Values
-        const dataObj = listData[index];
-        const descObj = dataObj.weather ? dataObj.weather[0] : null;
+        const dataObj: Record<string, any> = listData[index];
+        const descObj: Record<string, any> | null = dataObj.weather ? dataObj.weather[0] : null;
         // Process Values
-        const resultObj = createWeatherResultObject(dataObj, descObj, unit, lang, timezone);
+        const resultObj: Record<string, any> = {
+          time: formatTimeData(dataObj.dt, timezone),
+          icon: descObj?.icon ? `https://openweathermap.org/img/wn/${descObj.icon}.png` : "",
+          temp: formatTempData(dataObj.main?.temp, unit),
+          desc: descObj?.description ?? "N/A",
+          feels_like: formatTempData(dataObj.main?.feels_like, unit),
+          temp_min: formatTempData(dataObj.main?.temp_min, unit),
+          temp_max: formatTempData(dataObj.main?.temp_max, unit),
+          humidity: dataObj.main?.humidity ? `${dataObj.main.humidity}%` : "N/A",
+          wind_speed: formatWindData(dataObj.wind?.speed, unit),
+          dt_str: getDateTimeStringByLang(lang, false, dataObj.dt, timezone),
+        };
         // Push Value
         resultData.next.list.push(resultObj);
       }
@@ -129,19 +128,4 @@ function processThreeHourWeather(weatherObj: Record<string, any>, unit: string =
   }
   // Return Data
   return resultData;
-}
-
-function createWeatherResultObject(dataObj: Record<string, any>, descObj: Record<string, any>, unit: string, lang: string, timezone: number): object {
-  const timeStr = formatTimeData(dataObj.dt, timezone);
-  const tempStr = formatTempData(dataObj.main?.temp, unit);
-  const iconUrl = descObj?.icon ? `https://openweathermap.org/img/wn/${descObj.icon}.png` : "";
-  const descStr = descObj?.description ?? "N/A";
-  const feelsLikeStr = formatTempData(dataObj.main?.feels_like, unit);
-  const tempMinStr = formatTempData(dataObj.main?.temp_min, unit);
-  const tempMaxStr = formatTempData(dataObj.main?.temp_max, unit);
-  const humidityStr = dataObj.main?.humidity ? `${dataObj.main.humidity}%` : "N/A";
-  const windStr = formatWindData(dataObj.wind?.speed, unit);
-  const dateStr = getDateTimeStringByLang(lang, false, dataObj.dt, timezone);
-  // Return Object
-  return { time: timeStr, icon: iconUrl, temp: tempStr, desc: descStr, feels_like: feelsLikeStr, temp_min: tempMinStr, temp_max: tempMaxStr, humidity: humidityStr, wind_speed: windStr, dt_str: dateStr };
 }

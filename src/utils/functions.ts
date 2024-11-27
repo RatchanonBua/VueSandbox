@@ -22,12 +22,12 @@ export function getDateTimeStringByLang(lang: string = "th", isUseDeviceTime: bo
     tzOffset = Math.floor(offset / 3600);
     tzMinute = Math.floor((Math.abs(offset) % 3600) / 60);
     // Adjust Date
-    const adjustedOffset = offset + (dateObj.getTimezoneOffset() * 60);
-    const adjustedTS = dateObj.getTime() + adjustedOffset * 1000;
+    const adjustedOffset: number = offset + (dateObj.getTimezoneOffset() * 60);
+    const adjustedTS: number = dateObj.getTime() + adjustedOffset * 1000;
     dateObj = new Date(adjustedTS);
   }
   // Timezone Format
-  const tzFormat = `UTC${tzOffset >= 0 ? "+" : "-"}${Math.abs(tzOffset)}:${tzMinute < 10 ? "0" + tzMinute : tzMinute}`;
+  const tzFormat: string = `UTC${tzOffset >= 0 ? "+" : "-"}${Math.abs(tzOffset)}:${tzMinute < 10 ? "0" + tzMinute : tzMinute}`;
   // Initial String
   let wkdayStr: string, dateStr: number, monthStr: string, yearStr: string, ordinalSuffix: string;
   // Process Value
@@ -56,7 +56,7 @@ export function getDateTimeStringByLang(lang: string = "th", isUseDeviceTime: bo
 export function addURLTimestampCache(url: string): string {
   if (url.trim().length > 0) {
     try {
-      const urlObj = new URL(url);
+      const urlObj: URL = new URL(url);
       urlObj.searchParams.append("ts", Date.now().toString());
       return urlObj.toString();
     } catch (error: any) {
@@ -98,23 +98,23 @@ export function formatWindData(speed: number | undefined, unit: string): string 
 export function formatTimeData(timestamp: number | undefined, timezone: number): string {
   if (typeof timestamp !== "number") return "N/A";
   // Date Object (Seconds to Milliseconds)
-  const dateObject = new Date(timestamp * 1000);
+  const dateObject: Date = new Date(timestamp * 1000);
   // Adjust Data with Timezone
-  const hUTCNum = dateObject.getUTCHours();
-  const mUTCNum = dateObject.getUTCMinutes();
-  const adjustedH = (hUTCNum + Math.floor(timezone / 3600)) % 24;
-  const adjustedM = (mUTCNum + Math.floor((timezone % 3600) / 60)) % 60;
+  const hUTCNum: number = dateObject.getUTCHours();
+  const mUTCNum: number = dateObject.getUTCMinutes();
+  const adjustedH: number = (hUTCNum + Math.floor(timezone / 3600)) % 24;
+  const adjustedM: number = (mUTCNum + Math.floor((timezone % 3600) / 60)) % 60;
   // Adjust if Negative Minutes
-  let finalH = adjustedH;
-  let finalM = adjustedM;
+  let finalH: number = adjustedH;
+  let finalM: number = adjustedM;
   if (adjustedM < 0) {
     finalM = adjustedM + 60;
     finalH = (finalH - 1 + 24) % 24;
   }
   if (finalH < 0) finalH += 24;
   // Format String
-  const hString = String(finalH).padStart(2, "0");
-  const mString = String(finalM).padStart(2, "0");
+  const hString: string = String(finalH).padStart(2, "0");
+  const mString: string = String(finalM).padStart(2, "0");
   // Return Data
   return `${hString}:${mString}`;
 }

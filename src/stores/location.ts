@@ -23,20 +23,20 @@ export const useLocationStore = defineStore("location", () => {
         getLocationFromGPS(resolve, reject);
       } else {
         console.log("init-location-service:no-api");
-        const errorMessage = handleLocationError(false, false);
+        const errorMessage: string = handleLocationError(false, false);
         reject(new Error(errorMessage));
       }
     });
   };
   // Get Location From GPS
   const getLocationFromGPS = (resolve: Function, reject: Function): void => {
-    const options = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
+    const options: object = { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 };
     navigator.geolocation.getCurrentPosition(
       (position) => {
         let coordsJSON = position.coords.toJSON();
         // Timestamp Data
-        const tsNum = position.timestamp;
-        const tsStr = new Date(tsNum).toISOString();
+        const tsNum: number = position.timestamp;
+        const tsStr: string = new Date(tsNum).toISOString();
         coordsJSON = { ...coordsJSON, timestampNum: tsNum, timestampStr: tsStr };
         // Result Data
         console.log("get-location-from-gps:retrieve-success", `Success`);
@@ -45,8 +45,8 @@ export const useLocationStore = defineStore("location", () => {
       },
       (error) => {
         // Error String
-        let errorString = "UNKNOWN_ERROR";
-        let hasPermission = true;
+        let errorString: string = "UNKNOWN_ERROR";
+        let hasPermission: boolean = true;
         switch (error.code) {
           case 1:
             hasPermission = false;
@@ -64,7 +64,7 @@ export const useLocationStore = defineStore("location", () => {
         }
         // Send Error String
         console.log("get-location-from-gps:retrieve-error", `Code:${error.code},String:${errorString}`);
-        const errorMessage = handleLocationError(true, hasPermission, errorString);
+        const errorMessage: string = handleLocationError(true, hasPermission, errorString);
         reject(new Error(errorMessage));
       },
       options
@@ -73,7 +73,7 @@ export const useLocationStore = defineStore("location", () => {
   // Handle Location Error
   const handleLocationError = (hasGeolocation: boolean, hasPermission: boolean, errorString: string = ""): string => {
     // Define Message
-    let errorMessage = "";
+    let errorMessage: string = "";
     if (!hasGeolocation) {
       errorMessage = "อุปกรณ์ไม่รองรับการทำงานของ GPS";
     } else if (!hasPermission) {
@@ -104,7 +104,7 @@ export const useLocationStore = defineStore("location", () => {
             } else {
               // Permission: Denied
               console.log("init-location-service:no-prompt", permission.state);
-              const errorMessage = handleLocationError(true, false);
+              const errorMessage: string = handleLocationError(true, false);
               reject(new Error(errorMessage));
             }
           };
@@ -115,7 +115,7 @@ export const useLocationStore = defineStore("location", () => {
         } else {
           // Permission: Denied
           console.log("init-location-service:no-perms", permission.state);
-          const errorMessage = handleLocationError(true, false);
+          const errorMessage: string = handleLocationError(true, false);
           reject(new Error(errorMessage));
         }
       });

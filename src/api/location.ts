@@ -16,7 +16,7 @@ export function fetchLocationString(cityName: string = ""): Promise<object> {
         // console.log("Location Data:", resultLocData);
         if (Array.isArray(resultLocData) && resultLocData.length > 0) {
           const locationObj: Record<string, any> = resultLocData[0];
-          const locationName = await getCityNameWithCountry(locationObj);
+          const locationName: string = await getCityNameWithCountry(locationObj);
           resolve({ data: locationObj, full_name: locationName });
         } else {
           reject({ errorType: "data", errorMsg: "DATA_NOT_FOUND", resultData: resultLocData });
@@ -24,7 +24,7 @@ export function fetchLocationString(cityName: string = ""): Promise<object> {
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log("fetchLocationString Error:", jqXHR, textStatus, errorThrown);
-        const errorMsg = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
+        const errorMsg: string = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
         reject({ errorType: "api", errorMsg: errorMsg, jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
@@ -48,7 +48,7 @@ export function fetchLocationCoords(latitude: number, longitude: number): Promis
         // console.log("Location Data:", resultLocData);
         if (Array.isArray(resultLocData) && resultLocData.length > 0) {
           const locationObj: Record<string, any> = resultLocData[0];
-          const locationName = await getCityNameWithCountry(locationObj);
+          const locationName: string = await getCityNameWithCountry(locationObj);
           resolve({ data: locationObj, full_name: locationName });
         } else {
           reject({ errorType: "data", errorMsg: "DATA_NOT_FOUND", resultData: resultLocData });
@@ -56,7 +56,7 @@ export function fetchLocationCoords(latitude: number, longitude: number): Promis
       },
       error: function (jqXHR, textStatus, errorThrown) {
         console.log("fetchLocationCoords Error:", jqXHR, textStatus, errorThrown);
-        const errorMsg = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
+        const errorMsg: string = `ERR_LOC: ${textStatus === "error" ? jqXHR.status : textStatus.toUpperCase()}`;
         // Return Data
         reject({ errorType: "api", errorMsg: errorMsg, jqXHR: jqXHR, textStatus: textStatus, errorThrown: errorThrown });
       },
@@ -84,10 +84,10 @@ async function getCityNameWithCountry(locationObj: Record<string, any>, lang: st
     return locationName;
   }
   // Fetch Country Data
-  const locationWithCode = `${locationName}${locationObj?.country ? `, ${locationObj.country}` : ""}`;
+  const locationWithCode: string = `${locationName}${locationObj?.country ? `, ${locationObj.country}` : ""}`;
   try {
     // console.log(`REST Countries URL: ${codeUrl}/${countryCode}`);
-    const resultCodeData = await $.ajax({
+    const resultCodeData: any[] = await $.ajax({
       url: `${codeUrl}/${countryCode}`,
       method: "GET",
       dataType: "json",
@@ -98,7 +98,7 @@ async function getCityNameWithCountry(locationObj: Record<string, any>, lang: st
     const countryCommonName: string = countryData?.name?.common ?? ""; /** English Name (String) **/
     const countryNativeName: Record<string, any> = countryData?.name?.nativeName; /** Name Object (Object) **/
     // Check Country Data
-    const resultLocName = locationObj?.name ? (countryCommonName ? `${locationObj.name}, ${countryCommonName}` : locationWithCode) : "???";
+    const resultLocName: string = locationObj?.name ? (countryCommonName ? `${locationObj.name}, ${countryCommonName}` : locationWithCode) : "???";
     if (countryNativeName) {
       switch (lang) {
         case "th":
