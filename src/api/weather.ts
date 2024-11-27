@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { formatTemperatureData, formatWindSpeedData, formatTimestampData } from "@/utils/functions";
+import { getDateTimeStringByLang, formatTempData, formatWindData, formatTimeData } from "@/utils/functions";
 
 export function fetchCurrentWeather(latitude: number, longitude: number, unit: string = "metric", lang: string = "th"): Promise<object> {
   // OpenWeather API
@@ -14,7 +14,7 @@ export function fetchCurrentWeather(latitude: number, longitude: number, unit: s
       timeout: 5000,
       data: { lat: latitude, lon: longitude, units: unit, lang: lang, appid: apiKey },
       success: function (weatherData) {
-        const weatherObj = processCurrentWeather(weatherData);
+        const weatherObj = processCurrentWeather(weatherData, unit, lang);
         // console.log("Weather Data:", { data: weatherData, obj: weatherObj });
         resolve({ data: weatherData, obj: weatherObj });
       },
@@ -41,7 +41,7 @@ export function fetchThreeHourWeather(latitude: number, longitude: number, unit:
       timeout: 5000,
       data: { lat: latitude, lon: longitude, units: unit, lang: lang, appid: apiKey },
       success: function (weatherData) {
-        const weatherObj = procesThreeHourWeather(weatherData);
+        const weatherObj = procesThreeHourWeather(weatherData, unit, lang);
         console.log("Weather Data:", { data: weatherData, obj: weatherObj });
         resolve({ data: weatherData, obj: weatherObj });
       },
@@ -55,11 +55,10 @@ export function fetchThreeHourWeather(latitude: number, longitude: number, unit:
   });
 }
 
-function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "metric"): object {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const deviceOffset = new Date().getTimezoneOffset() * 60;
+function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "metric", lang: string = "th"): object {
   // Initial Data
-  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", wind_speed: "N/A", humidity: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, curr_offset: deviceOffset, data_offset: null as number | null };
+  const deviceOffset = new Date().getTimezoneOffset() * 60;
+  const resultData = { lat: null, lon: null, icon: "", temp: "N/A", desc: "N/A", feels_like: "N/A", temp_min: "N/A", temp_max: "N/A", humidity: "N/A", wind_speed: "N/A", sunrise: "N/A", sunset: "N/A", dt: null as number | null, dt_str: null as string | null, curr_tz: deviceOffset, data_tz: null as number | null };
   // Location Data
   resultData.lat = weatherObj?.coord?.lat ?? null;
   resultData.lon = weatherObj?.coord?.lon ?? null;
@@ -68,30 +67,65 @@ function processCurrentWeather(weatherObj: Record<string, any>, unit: string = "
   resultData.icon = weatherDesc?.icon ? `https://openweathermap.org/img/wn/${weatherDesc.icon}@2x.png` : "";
   resultData.desc = weatherDesc?.description ?? "N/A";
   // Weather Data
+  resultData.temp = formatTempData(weatherObj?.main?.temp, unit);
+  resultData.feels_like = formatTempData(weatherObj?.main?.feels_like, unit);
+  resultData.temp_min = formatTempData(weatherObj?.main?.temp_min, unit);
+  resultData.temp_max = formatTempData(weatherObj?.main?.temp_max, unit);
   resultData.humidity = weatherObj?.main?.humidity ? `${weatherObj.main.humidity}%` : "N/A";
-  resultData.temp = formatTemperatureData(weatherObj?.main?.temp, unit);
-  resultData.feels_like = formatTemperatureData(weatherObj?.main?.feels_like, unit);
-  resultData.temp_min = formatTemperatureData(weatherObj?.main?.temp_min, unit);
-  resultData.temp_max = formatTemperatureData(weatherObj?.main?.temp_max, unit);
-  resultData.wind_speed = formatWindSpeedData(weatherObj?.wind?.speed, unit);
+  resultData.wind_speed = formatWindData(weatherObj?.wind?.speed, unit);
   // Time Data
   if (typeof weatherObj?.dt === "number" && typeof weatherObj?.timezone === "number") {
     // Timestamp & Timezone
     resultData.dt = weatherObj.dt;
-    resultData.data_offset = weatherObj.timezone;
+    resultData.data_tz = weatherObj.timezone;
+    resultData.dt_str = getDateTimeStringByLang(lang, false, weatherObj.dt, weatherObj.timezone);
     // Sunrise & Sunset
-    resultData.sunrise = formatTimestampData(weatherObj?.sys?.sunrise, weatherObj.timezone);
-    resultData.sunset = formatTimestampData(weatherObj?.sys?.sunset, weatherObj.timezone);
+    resultData.sunrise = formatTimeData(weatherObj?.sys?.sunrise, weatherObj.timezone);
+    resultData.sunset = formatTimeData(weatherObj?.sys?.sunset, weatherObj.timezone);
   }
   // Return Data
   return resultData;
 }
 
-function procesThreeHourWeather(weatherObj: Record<string, any>, unit: string = "metric"): object {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const deviceOffset = new Date().getTimezoneOffset() * 60;
+function procesThreeHourWeather(weatherObj: Record<string, any>, unit: string = "metric", lang: string = "th"): object {
   // Initial Data
+  const deviceOffset = new Date().getTimezoneOffset() * 60;
   const resultData = { curr: null as Record<string, any> | null, next: null as Record<string, any> | null, date: null as Record<string, any> | null };
+  // Check Timezone Exist
+  if (typeof weatherObj?.city?.timezone === "number") {
+    // Process Main Data
+    const latitude = weatherObj.city.coord?.lat ?? null;
+    const longitude = weatherObj.city.coord?.lon ?? null;
+    const timezone = weatherObj.city.timezone;
+    // Process Curr Data
+    // Process Next Data
+    if (Array.isArray(weatherObj.list) && weatherObj.list.length > 0) {
+      // Init Section
+      resultData.next = { lat: latitude, lon: longitude, curr_tz: deviceOffset, data_tz: timezone, list: [] };
+      // Loop Section
+      const listData = weatherObj.list;
+      const loopLimit = Math.min(listData.length, 7);
+      for (let index = 0; index < loopLimit; index++) {
+        // Access Values
+        const dataObj = listData[index];
+        const descObj = dataObj.weather ? dataObj.weather[0] : null;
+        // Process Values
+        const timeStr = formatTimeData(dataObj.dt, timezone);
+        const iconUrl = descObj?.icon ? `https://openweathermap.org/img/wn/${descObj.icon}.png` : "";
+        const descStr = descObj?.description ?? "N/A";
+        const tempStr = formatTempData(dataObj.main?.temp, unit);
+        const feelsLikeStr = formatTempData(dataObj.main?.feels_like, unit);
+        const tempMinStr = formatTempData(dataObj.main?.temp_min, unit);
+        const tempMaxStr = formatTempData(dataObj.main?.temp_max, unit);
+        const humidityStr = dataObj.main?.humidity ? `${dataObj.main.humidity}%` : "N/A";
+        const windStr = formatWindData(dataObj.wind?.speed, unit);
+        const dateStr = getDateTimeStringByLang(lang, false, dataObj.dt, timezone);
+        // Push Value
+        resultData.next.list.push({ time: timeStr, icon: iconUrl, temp: tempStr, desc: descStr, feels_like: feelsLikeStr, temp_min: tempMinStr, temp_max: tempMaxStr, humidity: humidityStr, wind_speed: windStr, dt_str: dateStr });
+        // console.log(index, resultData.next.list);
+      }
+    }
+  }
   // Return Data
   return resultData;
 }

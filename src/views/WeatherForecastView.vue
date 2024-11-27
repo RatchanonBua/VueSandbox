@@ -31,17 +31,15 @@ export default {
       locGPSData: null as GeoLocationData | null,
       locationName: "???",
       currWeatherData: null as Record<string, any> | null,
-      nextWeatherData: null,
-      dateWeatherData: null,
+      nextWeatherData: null as Record<string, any> | null,
+      dateWeatherData: null as Record<string, any> | null,
       errorGPSMessage: null as string | null,
       errorAPIMessage: null as string | null,
       isShowResult: false,
       isShowCrossX: false,
       btnCSS: "text-white pt-0.5",
-      dateStr: this.getDateStrLang("th"),
-      isLoadingData: false,
-      isLoadingByStr: false,
-      isLoadingByGPS: false,
+      dtCurrString: "",
+      isLoading: { byStr: false, byGPS: false, general: false },
     };
   },
   setup() {
@@ -52,20 +50,15 @@ export default {
   methods: {
     toggleSearchArea(): void {
       if (this.isShowResult) {
-        this.toggleLoadData("str", false);
-        this.toggleLoadData("gps", false);
+        this.toggleLoadData(false, "byStr");
+        this.toggleLoadData(false, "byGPS");
       }
       this.isShowResult = !this.isShowResult;
     },
-    toggleLoadData(type: string, toggle: boolean): void {
-      if (type === "str" || type === "gps") {
-        this.isLoadingData = toggle;
-        if (type === "str") {
-          this.isLoadingByStr = toggle;
-        }
-        if (type === "gps") {
-          this.isLoadingByGPS = toggle;
-        }
+    toggleLoadData(toggle: boolean, type: keyof typeof this.isLoading): void {
+      this.isLoading[type] = toggle;
+      if (type === "general") {
+        this.isLoading.general = toggle;
       }
     },
     clearErrors(): void {
@@ -75,12 +68,11 @@ export default {
     // Search Section
     async fetchLocationByStr(): Promise<void> {
       this.clearErrors();
-      this.toggleLoadData("str", true);
-      // Fetch Data
+      this.toggleLoadData(true, "byStr");
       this.searchStr = this.searchStr.trim();
       if (this.searchStr.length === 0) {
         this.errorAPIMessage = "กรุณาระบุชื่อสถานที่";
-        this.toggleLoadData("str", false);
+        this.toggleLoadData(false, "byStr");
       } else {
         this.getDataByLocationStr(this.searchStr);
       }
@@ -94,8 +86,13 @@ export default {
         const locationName: string = locationResult.full_name;
         if (typeof locationData?.lat === "number" && typeof locationData?.lon === "number") {
           try {
+            // Weather Curr Value
             const weatherCurrResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
             this.currWeatherData = weatherCurrResult.obj;
+            // Weather Next Value
+            const weatherNextResult: Record<string, any> = await fetchThreeHourWeather(locationData.lat, locationData.lon);
+            this.nextWeatherData = weatherNextResult.obj;
+            // Other Values
             this.locationName = locationName;
             this.isShowCrossX = true;
             this.isShowResult = true;
@@ -112,14 +109,12 @@ export default {
         } else {
           this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น ${errorObj.errorMsg}`;
         }
-      } finally {
-        // this.toggleLoadData("str", false);
       }
     },
     // GPS Section
     async fetchLocationByGPS(): Promise<void> {
       this.clearErrors();
-      this.toggleLoadData("gps", true);
+      this.toggleLoadData(true, "byGPS");
       // Fetch Data
       try {
         await this.locationStore.initLocationService();
@@ -127,20 +122,25 @@ export default {
         this.getDataByLocationGPS(this.locGPSData.latitude, this.locGPSData.longitude);
       } catch (error: any) {
         this.errorGPSMessage = error.message;
-        this.toggleLoadData("gps", false);
+        this.toggleLoadData(true, "byGPS");
         console.log("Error: ", this.errorGPSMessage);
       }
     },
     async getDataByLocationGPS(lat: number | null = 0, lon: number | null = 0): Promise<void> {
-      // console.log(`Latitude: ${lat}, Longitude: ${lon}`);
+      // await this.fetchWeatherData(lat, lon, "byGPS");
       try {
         const locationResult: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
         const locationData: Record<string, any> = locationResult.data;
         const locationName: string = locationResult.full_name;
         if (typeof locationData?.lat === "number" && typeof locationData?.lon === "number") {
           try {
+            // Weather Curr Value
             const weatherCurrResult: Record<string, any> = await fetchCurrentWeather(locationData.lat, locationData.lon);
             this.currWeatherData = weatherCurrResult.obj;
+            // Weather Next Value
+            const weatherNextResult: Record<string, any> = await fetchThreeHourWeather(locationData.lat, locationData.lon);
+            this.nextWeatherData = weatherNextResult.obj;
+            // Other Values
             this.locationName = locationName;
             this.isShowCrossX = true;
             this.isShowResult = true;
@@ -156,14 +156,7 @@ export default {
         } else {
           this.errorAPIMessage = `เกิดข้อผิดพลาดขึ้น (${errorObj.errorMsg})`;
         }
-      } finally {
-        // this.toggleLoadData("gps", false);
       }
-    },
-    // Test Function
-    async fetchLocation3Hour(): Promise<void> {
-      console.log("Test Function");
-      const weatherHourResult = await fetchThreeHourWeather(13.9508265, 100.6333279);
     },
   },
   computed: {
@@ -182,8 +175,11 @@ export default {
     getCurrWeatherData() {
       return this.currWeatherData;
     },
-    getDateString() {
-      return this.dateStr;
+    getNextWeatherData() {
+      return this.nextWeatherData;
+    },
+    getDateTimeString() {
+      return this.dtCurrString;
     },
   },
 };
@@ -200,7 +196,7 @@ export default {
             <div class="w-full max-w-lg p-4 bg-opacity-20 bg-black shadow-lg rounded-lg">
               <div class="relative">
                 <div class="absolute w-full -top-1 text-right">
-                  <button class="w-6 h-6 rounded-full object-cover" :style="{ visibility: isShowCrossX ? 'visible' : 'hidden' }" @click="toggleSearchArea">
+                  <button class="w-5 h-5 rounded-full object-cover" :style="{ visibility: isShowCrossX ? 'visible' : 'hidden' }" @click="toggleSearchArea">
                     <IconXMark :cssClass="btnCSS" />
                   </button>
                 </div>
@@ -215,8 +211,8 @@ export default {
                     <!-- Search Bar -->
                     <input type="text" v-model="searchStr" placeholder="ค้นหาชื่อเมือง" class="h-12 w-full px-4 py-2 text-black dark:text-white dark:bg-opacity-20 dark:bg-black border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 box-border" />
                     <!-- Search Button with icon -->
-                    <button :disabled="isLoadingData" @click="fetchLocationByStr" class="flex items-center justify-center h-12 px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 box-border transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale">
-                      <IconLoading v-if="isLoadingData && isLoadingByStr" class="w-7 h-7 text-white" />
+                    <button :disabled="isLoading.general" @click="fetchLocationByStr" class="flex items-center justify-center h-12 px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 box-border transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale">
+                      <IconLoading v-if="isLoading.general && isLoading.byStr" class="w-7 h-7 text-white" />
                       <IconSearch v-else class="w-7 h-7 text-white" />
                     </button>
                   </div>
@@ -232,8 +228,8 @@ export default {
                   </div>
                 </div>
                 <div class="button-group">
-                  <button :disabled="isLoadingData" @click="fetchLocationByGPS" class="w-full px-6 py-2 text-white font-medium bg-green-500 hover:bg-green-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 box-border transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale">
-                    <div v-if="isLoadingData && isLoadingByGPS" class="flex items-center justify-center gap-x-1">
+                  <button :disabled="isLoading.general" @click="fetchLocationByGPS" class="w-full px-6 py-2 text-white font-medium bg-green-500 hover:bg-green-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 box-border transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale">
+                    <div v-if="isLoading.general && isLoading.byGPS" class="flex items-center justify-center gap-x-1">
                       <IconLoading class="w-[20px] h-[20px] text-white" />
                       <span>กำลังโหลด...</span>
                     </div>
@@ -256,118 +252,87 @@ export default {
       <div class="relative" v-show="isShowResult">
         <div class="forecast-result">
           <!-- Location & Date -->
-          <div class="flex grow">
+          <div class="flex grow pb-2">
             <div class="w-full">
               <h1 class="m-0 text-xl font-semibold" id="city-str">{{ getLocationName }}</h1>
-              <div class="text-sm" id="date-str">{{ getDateString }}</div>
+              <!-- <div class="text-sm" id="date-str" v-if="getCurrWeatherData?.dt_str">{{ getCurrWeatherData.dt_str }}</div> -->
               <div class="hidden" v-if="getLocationData?.latitude && getLocationData?.longitude">{{ getLocationData.latitude }},{{ getLocationData.longitude }}</div>
             </div>
-            <div class="search-button ml-4 text-right">
-              <button class="w-6 h-6 rounded-full object-cover" @click="fetchLocation3Hour">
+            <div class="search-button ml-4 text-right h-6">
+              <button class="w-5 h-5 rounded-full object-cover" @click="toggleSearchArea">
                 <IconSearch :cssClass="btnCSS" />
               </button>
             </div>
           </div>
           <!-- Forecast Group -->
-          <div class="flex flex-col bs-sm:flex-row">
-            <!-- Current Temperature -->
-            <div class="flex mt-4 mb-4 justify-center items-center bs-sm:w-1/2">
-              <div class="my-4 rounded-full bg-gray-200 bg-opacity-60">
-                <ImageComponent :urlImg="getCurrWeatherData?.icon ?? ''" altImg="Forecast Icon" cssClass="h-[76px] aspect-square rounded-full" :isShowErr="true" errClass="h-[76px] aspect-square rounded-full p-3"></ImageComponent>
-              </div>
-              <div class="ml-4 my-4">
-                <div class="text-5xl font-bold text-right">{{ getCurrWeatherData?.temp ?? "N/A" }}</div>
-                <div class="text-lg text-center">{{ getCurrWeatherData?.desc ?? "N/A" }}</div>
-              </div>
+          <div class="block border-t-2">
+            <div class="pt-2">
+              <h2 class="text-base font-bold text-white text-opacity-80">สภาพอากาศปัจจุบัน (ณ สถานที่)</h2>
+              <div class="text-sm" v-if="getCurrWeatherData?.dt_str">ข้อมูล ณ {{ getCurrWeatherData.dt_str }}</div>
             </div>
-            <!-- Current Stats -->
-            <div class="bs-sm:w-1/2">
-              <div class="flex flex-wrap justify-around text-center mb-4 bs-sm:my-4 gap-y-2">
-                <CurrentStatsItem>
-                  <template #value>{{ getCurrWeatherData?.temp_min ?? "N/A" }}</template>
-                  <template #label>ต่ำสุด (ปัจจุบัน)</template>
-                </CurrentStatsItem>
-                <CurrentStatsItem>
-                  <template #value>{{ getCurrWeatherData?.wind_speed ?? "N/A" }}</template>
-                  <template #label>ความเร็วลม</template>
-                </CurrentStatsItem>
-                <CurrentStatsItem>
-                  <template #value>{{ getCurrWeatherData?.sunrise ?? "N/A" }}</template>
-                  <template #label>ขึ้น (ณ สถานที่)</template>
-                </CurrentStatsItem>
-                <CurrentStatsItem>
-                  <template #value>{{ getCurrWeatherData?.temp_max ?? "N/A" }}</template>
-                  <template #label>สูงสุด (ปัจจุบัน)</template>
-                </CurrentStatsItem>
-                <CurrentStatsItem>
-                  <template #value>{{ getCurrWeatherData?.humidity ?? "N/A" }}</template>
-                  <template #label>ค่าความชื้น</template>
-                </CurrentStatsItem>
-                <CurrentStatsItem>
-                  <template #value>{{ getCurrWeatherData?.sunset ?? "N/A" }}</template>
-                  <template #label>ตก (ณ สถานที่)</template>
-                </CurrentStatsItem>
+            <div class="flex flex-col bs-sm:flex-row">
+              <!-- Current Temperature -->
+              <div class="flex mt-4 mb-4 justify-center items-center bs-sm:w-1/2">
+                <div class="my-4 rounded-full bg-gray-200 bg-opacity-60">
+                  <ImageComponent :urlImg="getCurrWeatherData?.icon ?? ''" :altImg="getCurrWeatherData?.desc ?? ''" cssClass="h-[76px] aspect-square rounded-full" :isShowErr="true" errClass="h-[76px] aspect-square rounded-full p-3"></ImageComponent>
+                </div>
+                <div class="ml-4 my-4">
+                  <div class="text-5xl font-bold text-right">{{ getCurrWeatherData?.temp ?? "N/A" }}</div>
+                  <div class="text-lg text-center">{{ getCurrWeatherData?.desc ?? "N/A" }}</div>
+                </div>
+              </div>
+              <!-- Current Stats -->
+              <div class="bs-sm:w-1/2 mb-4 bs-sm:my-4">
+                <div class="flex flex-wrap justify-around text-center gap-y-2">
+                  <CurrentStatsItem>
+                    <template #value>{{ getCurrWeatherData?.temp_min ?? "N/A" }}</template>
+                    <template #label>ต่ำสุด (ปัจจุบัน)</template>
+                  </CurrentStatsItem>
+                  <CurrentStatsItem>
+                    <template #value>{{ getCurrWeatherData?.wind_speed ?? "N/A" }}</template>
+                    <template #label>ความเร็วลม</template>
+                  </CurrentStatsItem>
+                  <CurrentStatsItem>
+                    <template #value>{{ getCurrWeatherData?.sunrise ?? "N/A" }}</template>
+                    <template #label>ขึ้น (ณ สถานที่)</template>
+                  </CurrentStatsItem>
+                  <CurrentStatsItem>
+                    <template #value>{{ getCurrWeatherData?.temp_max ?? "N/A" }}</template>
+                    <template #label>สูงสุด (ปัจจุบัน)</template>
+                  </CurrentStatsItem>
+                  <CurrentStatsItem>
+                    <template #value>{{ getCurrWeatherData?.humidity ?? "N/A" }}</template>
+                    <template #label>ค่าความชื้น</template>
+                  </CurrentStatsItem>
+                  <CurrentStatsItem>
+                    <template #value>{{ getCurrWeatherData?.sunset ?? "N/A" }}</template>
+                    <template #label>ตก (ณ สถานที่)</template>
+                  </CurrentStatsItem>
+                </div>
               </div>
             </div>
           </div>
           <!-- Weather by Hour -->
           <div class="hidden bs-sm:block">
-            <h2 class="pb-2 text-base text-white text-opacity-80">สภาพอากาศชั่วโมงถัดไป (ณ สถานที่)</h2>
-            <div class="grid grid-cols-7 gap-2 pb-2">
-              <WeatherHourItem>
-                <template #time>03:00</template>
+            <h2 class="pb-2 text-base font-bold text-white text-opacity-80">สภาพอากาศชั่วโมงถัดไป (ณ สถานที่)</h2>
+            <!-- Weather Next Hour: If Block -->
+            <div class="grid grid-cols-7 gap-2 pb-2" v-if="Array.isArray(getNextWeatherData?.next?.list) && getNextWeatherData.next.list.length > 0">
+              <WeatherHourItem v-for="(item, index) in getNextWeatherData.next.list" :key="index">
+                <template #time>{{ item.time }}</template>
                 <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
+                  <ImageComponent :urlImg="item.icon" :altImg="item.desc" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
                 </template>
-                <template #value>15&deg;C</template>
+                <template #value>{{ item.temp }}</template>
               </WeatherHourItem>
-              <WeatherHourItem>
-                <template #time>06:00</template>
-                <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
-                </template>
-                <template #value>20&deg;C</template>
-              </WeatherHourItem>
-              <WeatherHourItem>
-                <template #time>09:00</template>
-                <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
-                </template>
-                <template #value>25&deg;C</template>
-              </WeatherHourItem>
-              <WeatherHourItem>
-                <template #time>12:00</template>
-                <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
-                </template>
-                <template #value>30&deg;C</template>
-              </WeatherHourItem>
-              <WeatherHourItem>
-                <template #time>15:00</template>
-                <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
-                </template>
-                <template #value>35&deg;C</template>
-              </WeatherHourItem>
-              <WeatherHourItem>
-                <template #time>18:00</template>
-                <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
-                </template>
-                <template #value>25&deg;C</template>
-              </WeatherHourItem>
-              <WeatherHourItem>
-                <template #time>21:00</template>
-                <template #image>
-                  <ImageComponent urlImg="https://openweathermap.org/img/wn/10d.png" altImg="Forecast Icon" cssClass="aspect-square rounded-full bg-gray-200 bg-opacity-60" :isShowErr="true" errClass="h-[50px] aspect-square rounded-full p-3"></ImageComponent>
-                </template>
-                <template #value>15&deg;C</template>
-              </WeatherHourItem>
+            </div>
+            <!-- Weather Next Hour: Else Block -->
+            <div class="pb-2" v-else>
+              <div class="text-sm font-light">*ไม่พบข้อมูลสภาพอากาศชั่วโมงถัดไป*</div>
             </div>
           </div>
           <!-- Future Forecast -->
           <div class="w-full">
-            <h2 class="pb-2 text-base text-white text-opacity-80">พยากรณ์อากาศในวันอื่น (ณ สถานที่)</h2>
+            <h2 class="pb-2 text-base font-bold text-white text-opacity-80">พยากรณ์อากาศในวันอื่น (ณ สถานที่)</h2>
             <div class="flex flex-wrap">
               <!-- Start:Item 1 -->
               <WeatherNextItem>
