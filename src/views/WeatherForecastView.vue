@@ -57,9 +57,7 @@ export default {
     },
     toggleLoadData(toggle: boolean, type: keyof typeof this.isLoading): void {
       this.isLoading[type] = toggle;
-      if (type === "general") {
-        this.isLoading.general = toggle;
-      }
+      this.isLoading.general = toggle;
     },
     clearErrors(): void {
       this.errorGPSMessage = null;
@@ -69,6 +67,7 @@ export default {
     async fetchLocationByStr(): Promise<void> {
       this.clearErrors();
       this.toggleLoadData(true, "byStr");
+      // Get String
       this.searchStr = this.searchStr.trim();
       if (this.searchStr.length === 0) {
         this.errorAPIMessage = "กรุณาระบุชื่อสถานที่";
@@ -115,7 +114,7 @@ export default {
     async fetchLocationByGPS(): Promise<void> {
       this.clearErrors();
       this.toggleLoadData(true, "byGPS");
-      // Fetch Data
+      // Fetch GPS
       try {
         await this.locationStore.initLocationService();
         this.locGPSData = this.locationStore.locationData;
@@ -123,11 +122,9 @@ export default {
       } catch (error: any) {
         this.errorGPSMessage = error.message;
         this.toggleLoadData(true, "byGPS");
-        console.log("Error: ", this.errorGPSMessage);
       }
     },
     async getDataByLocationGPS(lat: number | null = 0, lon: number | null = 0): Promise<void> {
-      // await this.fetchWeatherData(lat, lon, "byGPS");
       try {
         const locationResult: Record<string, any> = await fetchLocationCoords(Number(lat), Number(lon));
         const locationData: Record<string, any> = locationResult.data;
