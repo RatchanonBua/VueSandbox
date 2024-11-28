@@ -22,7 +22,7 @@ export function getDateTimeStringByLang(lang: string = "th", isUseDeviceTime: bo
     tzOffset = Math.floor(offset / 3600);
     tzMinute = Math.floor((Math.abs(offset) % 3600) / 60);
     // Adjust Date
-    const adjustedOffset: number = offset + (dateObj.getTimezoneOffset() * 60);
+    const adjustedOffset: number = offset + dateObj.getTimezoneOffset() * 60;
     const adjustedTS: number = dateObj.getTime() + adjustedOffset * 1000;
     dateObj = new Date(adjustedTS);
   }
@@ -117,4 +117,27 @@ export function formatTimeData(timestamp: number | undefined, timezone: number):
   const mString: string = String(finalM).padStart(2, "0");
   // Return Data
   return `${hString}:${mString}`;
+}
+// Get Weekday in Locale
+export function getLocaleDateStrInObject(dateObj: Date, lang: string = "th"): Record<string, any> {
+  // Initial Data
+  const locale: string = lang.toLowerCase();
+  // Variable Data
+  let realLocaleStr: string = "";
+  // Get Locale Data
+  switch (locale) {
+    case "th":
+      realLocaleStr = "th-TH";
+      break;
+    default:
+      realLocaleStr = "en-US";
+      break;
+  }
+  // Set Locale String
+  const localeDateObj: Record<string, any> = {
+    wkdayShortStr: new Intl.DateTimeFormat(realLocaleStr, { weekday: "short" }).format(dateObj),
+    monthShortStr: new Intl.DateTimeFormat(realLocaleStr, { month: "short" }).format(dateObj),
+  };
+  // Return Data
+  return localeDateObj;
 }
