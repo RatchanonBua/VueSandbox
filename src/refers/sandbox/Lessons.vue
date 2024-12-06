@@ -1,4 +1,6 @@
 <script lang="ts">
+import { onBeforeUnmount, onBeforeUpdate, onMounted, onUpdated, ref } from "vue";
+
 export default {
   name: "App",
   data() {
@@ -17,6 +19,86 @@ export default {
       count: 0,
       isVisible: false,
       salary: 20000,
+    };
+  },
+  setup() {
+    // Stack Test
+    function a() {
+      console.log("Function a started");
+      return 10;
+    }
+    function b() {
+      console.log("Function b started");
+      let resultFromA = a();
+      console.log("Function a returned: " + resultFromA);
+      return resultFromA + 5;
+    }
+    function c() {
+      console.log("Function c started");
+      let resultFromB = b();
+      console.log("Function b returned: " + resultFromB);
+      return resultFromB * 2;
+    }
+    let finalResult = c();
+    console.log("Function c returned: " + finalResult);
+    // Heap Test
+    function createPerson(name: string, age: number) {
+      return { name: name, age: age };
+    }
+    let person1 = createPerson("John", 25);
+    let person2 = createPerson("Jane", 30);
+    person1.age = 20;
+    person2.age = 35;
+    console.log(person1, person2);
+    // Code Test
+    let str1 = "Hello";
+    let str2 = str1;
+    str2 = "World";
+    console.log(`Str1: ${str1}, Str2: ${str2}`);
+    let obj1 = { name: "Hello" };
+    let obj2 = obj1;
+    obj2.name = "World";
+    console.log(`Obj1: ${obj1.name}, Obj2: ${obj2.name}`);
+    // Async/Await
+    function delay(ms: number) {
+      return new Promise((resolve: any, reject: any) =>
+        setTimeout(() => {
+          resolve();
+          // reject({ message: "ABC" });
+        }, ms)
+      );
+    }
+    async function example() {
+      console.log("Start");
+      try {
+        await delay(2000);
+      } catch (error: any) {
+        console.error(error);
+      } finally {
+        console.log("End");
+      }
+    }
+    example();
+    // Lifecycle
+    const message = ref("Hello, Vue!");
+    onMounted(() => {
+      console.log("onMounted: Component is mounted.");
+    });
+    onBeforeUpdate(() => {
+      console.log("onBeforeUpdate: Component is updating.");
+    });
+    onUpdated(() => {
+      console.log("onBeforeUpdate: Component is updated.");
+    });
+    onBeforeUnmount(() => {
+      console.log("onBeforeUnmount: Component is about to be unmounted.");
+    });
+    const updateMessage = () => {
+      message.value = "Hello, Vue 3!";
+    };
+    return {
+      message,
+      updateMessage,
     };
   },
   methods: {
@@ -148,6 +230,10 @@ export default {
       <button @click.left="decrement()">ลด</button>
       <button @click.left="decrement(10)">ลดทีละ 10</button>
     </div>
+  </section>
+  <section>
+    <h1>{{ message }}</h1>
+    <button @click="updateMessage">Change Message</button>
   </section>
 </template>
 
