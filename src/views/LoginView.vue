@@ -1,6 +1,7 @@
 <script lang="ts">
 // Import Hooks
-import useLiffLogin from "@/hooks/liff";
+import useLiffLogin from "@/hooks/lifflogin";
+import useGoogleLogin from "@/hooks/gglogin";
 
 // Export Components
 export default {
@@ -14,15 +15,21 @@ export default {
     };
   },
   async mounted() {
-    await this.initLiffData();
+    // await this.initGoogleData();
+    // await this.initLiffData();
   },
   methods: {
+    // Google Login
+    async initGoogleData(): Promise<void> {
+      const { resultData, errorObject } = await useGoogleLogin();
+    },
+    // LIFF Login
     async initLiffData(): Promise<void> {
       this.isLiffLoading = true;
       // Init LIFF Data
-      const { liffInst, errorObj } = await useLiffLogin();
-      this.liffInst = liffInst.value;
-      this.errorObj = errorObj.value;
+      const { resultData, errorObject } = await useLiffLogin();
+      this.liffInst = resultData.value;
+      this.errorObj = errorObject.value;
       // Get LIFF Data
       if (this.liffInst === null) {
         const errorObj = this.errorObj;
@@ -141,7 +148,10 @@ export default {
         liffInst.ready.then(() => { console.log("ready:", "Success"); });
 
         /** scanCodeV2 (Promise<object> # see https://developers.line.biz/en/reference/liff/#scan-code-v2) */
-        await liffInst.scanCodeV2().then((data: any) => { console.log("scanCodeV2", data); }).catch((error: any) => { console.error("scanCodeV2", error); });
+        // await liffInst.scanCodeV2().then((data: any) => { console.log("scanCodeV2", data); }).catch((error: any) => { console.error("scanCodeV2", error); });
+        
+        /** logout (void # ---) **/
+        // liffInst.logout();
       } else {
         alert("กำลังโหลด กรุณารอสักครู่...");
       }
@@ -152,6 +162,7 @@ export default {
 
 <template>
   <main>
-    <button @click="getLiffData">GET LINE DATA</button>
+    <button @click="initGoogleData">Login with Google</button>
+    <!-- <button @click="getLiffData">GET LINE DATA</button> -->
   </main>
 </template>
